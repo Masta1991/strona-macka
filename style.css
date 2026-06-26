@@ -702,3 +702,46 @@ h1, h2, h3 {
 [data-theme="dark"] .ai-rec-box {
     background: rgba(0, 242, 255, 0.02);
 }
+
+/* --- RWD / MOBILE RESPONSIVENESS --- */
+@media (max-width: 1024px) {
+    .hero-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+    }
+    .bento-item {
+        min-height: 300px;
+    }
+    .map-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-grid {
+        grid-template-columns: 1fr;
+    }
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+    .nav-container {
+        padding: 0 1rem;
+    }
+    .nav-cta {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.8rem;
+    }
+    .bento-item {
+        min-height: 250px;
+        padding: 2rem;
+    }
+    .hero {
+        padding-top: 100px;
+    }
+    .section-title {
+        font-size: 2rem;
+    }
+    .logo-main {
+        font-size: 1.2rem;
+    }
+}
