@@ -703,45 +703,67 @@ h1, h2, h3 {
     background: rgba(0, 242, 255, 0.02);
 }
 
-/* --- RWD / MOBILE RESPONSIVENESS --- */
+/* --- RWD / MOBILE RESPONSIVENESS (SCALED DESKTOP) --- */
 @media (max-width: 1024px) {
     .hero-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: auto;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 250px);
+        gap: 1rem;
     }
     .bento-item {
-        min-height: 300px;
-    }
-    .map-grid {
-        grid-template-columns: 1fr;
+        padding: 1.5rem;
     }
 }
 
 @media (max-width: 768px) {
     .hero-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 35vw); /* Wysokość proporcjonalna do szerokości */
+        gap: 0.5rem;
     }
-    .services-grid {
-        grid-template-columns: 1fr;
+    .bento-item {
+        padding: 0.8rem;
+        min-height: auto;
+    }
+    .bento-item h2 {
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+    .bento-item p {
+        font-size: 0.6rem;
+        display: none; /* Ukrywamy tekst opisu, żeby się zmieścił */
+    }
+    .bento-tag, .ai-badge {
+        font-size: 0.5rem;
+        padding: 2px 4px;
+        margin-bottom: 4px;
+    }
+    .hero {
+        padding-top: 100px;
+        min-height: auto;
+    }
+    .logo-main {
+        font-size: 1.1rem;
+    }
+    .logo-sub {
+        font-size: 0.5rem;
+    }
+    .nav-cta {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
     }
     .nav-container {
         padding: 0 1rem;
     }
-    .nav-cta {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.8rem;
+    /* Usługi pozostawiamy 1-kolumnowe, żeby dało się je czytać, lub też 2 kolumny */
+    .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
-    .bento-item {
-        min-height: 250px;
-        padding: 2rem;
+    .service-card {
+        padding: 1.5rem;
     }
-    .hero {
-        padding-top: 100px;
-    }
-    .section-title {
-        font-size: 2rem;
-    }
-    .logo-main {
-        font-size: 1.2rem;
+    .service-card h3 {
+        font-size: 1.1rem;
     }
 }
