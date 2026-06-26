@@ -716,31 +716,37 @@ h1, h2, h3 {
 }
 
 @media (max-width: 768px) {
+    .hero {
+        padding-top: 90px;
+        padding-bottom: 20px;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+    }
     .hero-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, 35vw); /* Wysokość proporcjonalna do szerokości */
+        flex-grow: 1;
+        width: 100%;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
         gap: 0.5rem;
     }
     .bento-item {
-        padding: 0.8rem;
+        padding: 1rem;
         min-height: auto;
     }
     .bento-item h2 {
-        font-size: 0.9rem;
+        font-size: 1.1rem;
         margin-bottom: 2px;
     }
     .bento-item p {
-        font-size: 0.6rem;
-        display: none; /* Ukrywamy tekst opisu, żeby się zmieścił */
+        font-size: 0.75rem;
+        display: block; /* Pokazujemy opis, mamy więcej miejsca przy 2 kolumnach */
     }
     .bento-tag, .ai-badge {
-        font-size: 0.5rem;
-        padding: 2px 4px;
-        margin-bottom: 4px;
-    }
-    .hero {
-        padding-top: 100px;
-        min-height: auto;
+        font-size: 0.6rem;
+        padding: 4px 6px;
+        margin-bottom: 6px;
     }
     .logo-main {
         font-size: 1.1rem;
