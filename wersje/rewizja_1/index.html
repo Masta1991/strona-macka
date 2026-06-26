@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maciej Liedel | Fizjoterapia & Trening Medyczny</title>
+    <meta name="description" content="Specjalistyczna fizjoterapia, terapia manualna i trening medyczny. Innowacyjne podejście do zdrowia i ruchu.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-main">MACIEJ LIEDEL</span>
+                <span class="logo-sub">FIZJOTERAPIA</span>
+            </div>
+            <div class="nav-controls">
+                <button id="theme-toggle" class="theme-btn" title="Przełącz tryb">
+                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" class="nav-cta">Umów wizytę</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container hero-grid">
+            <a href="#about" class="bento-item bento-about">
+                <div class="bento-img bento-img-about"></div>
+                <div class="bento-content">
+                    <span class="bento-tag">Specjalista</span>
+                    <h2>O mnie</h2>
+                    <p>Mgr Maciej Liedel - fizjoterapeuta z pasją do ruchu.</p>
+                </div>
+            </a>
+            <a href="#services" class="bento-item bento-services">
+                <div class="bento-img bento-img-services"></div>
+                <div class="bento-content">
+                    <span class="bento-tag">Oferta</span>
+                    <h2>Usługi</h2>
+                    <p>Terapia manualna, stomatologiczna i trening.</p>
+                </div>
+            </a>
+            <a href="#publications" class="bento-item bento-pub">
+                <div class="bento-img bento-img-pub"></div>
+                <div class="bento-content">
+                    <h2>Publikacje</h2>
+                    <p>Wiedza oparta na dowodach.</p>
+                </div>
+            </a>
+            <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" class="bento-item bento-price">
+                <div class="bento-img bento-img-price"></div>
+                <div class="bento-content">
+                    <h2>Cennik</h2>
+                    <p>Przejrzyste zasady współpracy.</p>
+                </div>
+            </a>
+            <a href="#location" class="bento-item bento-loc">
+                <div class="bento-img bento-img-loc"></div>
+                <div class="bento-content">
+                    <h2>Lokalizacja</h2>
+                    <p>Warszawa | Radzymin</p>
+                </div>
+            </a>
+            <a href="#ai-consult" class="bento-item bento-ai">
+                <div class="bento-img bento-img-ai"></div>
+                <div class="bento-content">
+                    <span class="ai-badge">AI Assistant</span>
+                    <h2>Konsultacja AI</h2>
+                    <p>Wstępna analiza Twojego problemu.</p>
+                </div>
+            </a>
+        </div>
+    </header>
+
+        <!-- Sekcja Usługi -->
+        <section id="services" class="section services-section">
+            <div class="container">
+                <div class="section-intro">
+                    <span class="bento-tag">Specjalizacje</span>
+                    <h2 class="section-title">Jak mogę Ci pomóc?</h2>
+                    <p class="lead">Kompleksowe podejście do Twojego zdrowia oparte na nowoczesnej diagnostyce i terapii manualnej.</p>
+                </div>
+                
+                <div class="services-grid">
+                    <div class="service-card reveal">
+                        <div class="service-icon">🦷</div>
+                        <h3>Fizjoterapia Stomatologiczna</h3>
+                        <p>Specjalistyczna terapia stawów skroniowo-żuchwowych. Pomoc w leczeniu bruksizmu, napięciowych bólów głowy oraz dolegliwości po zabiegach stomatologicznych.</p>
+                        <div class="service-meta">
+                            <span>55 min</span>
+                            <span class="price">250 zł</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card reveal">
+                        <div class="service-icon">🦴</div>
+                        <h3>Chiropraktyka / Terapia Manualna</h3>
+                        <p>Mobilizacje i manipulacje kręgosłupa oraz stawów obwodowych. Skuteczna walka z ostrym i przewlekłym bólem kręgosłupa.</p>
+                        <div class="service-meta">
+                            <span>55 min</span>
+                            <span class="price">250 zł</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card reveal">
+                        <div class="service-icon">🏃</div>
+                        <h3>Fizjoterapia Sportowa</h3>
+                        <p>Rehabilitacja po urazach sportowych (skręcenia, zerwania więzadeł). Przygotowanie motoryczne i prewencja kontuzji dla amatorów i profesjonalistów.</p>
+                        <div class="service-meta">
+                            <span>55 min</span>
+                            <span class="price">250 zł</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card reveal">
+                        <div class="service-icon">🏥</div>
+                        <h3>Rehabilitacja Pooperacyjna</h3>
+                        <p>Indywidualny proces powrotu do sprawności po zabiegach ortopedycznych. Obejmuje ćwiczenia, terapię tkanek miękkich i edukację pacjenta.</p>
+                        <div class="service-meta">
+                            <span>55 min</span>
+                            <span class="price">250 zł</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card reveal">
+                        <div class="service-icon">📍</div>
+                        <h3>Suche Igłowanie</h3>
+                        <p>Precyzyjna terapia punktów spustowych za pomocą igieł akupunkturowych. Natychmiastowa ulga w silnych napięciach mięśniowych.</p>
+                        <div class="service-meta">
+                            <span>55 min</span>
+                            <span class="price">250 zł</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card reveal">
+                        <div class="service-icon">🧠</div>
+                        <h3>Konsultacja Fizjoterapeutyczna</h3>
+                        <p>Dogłębna analiza Twojego problemu, testy funkcjonalne i ułożenie planu terapii. Pierwszy krok do życia bez bólu.</p>
+                        <div class="service-meta">
+                            <span>55 min</span>
+                            <span class="price">250 zł</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="services-footer">
+                    <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" class="btn-primary">Zobacz pełną listę na Booksy</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja O Mnie -->
+        <section id="about" class="section about-section">
+            <div class="container split-layout">
+                <div class="about-text">
+                    <h2 class="section-title">Mgr Maciej Liedel</h2>
+                    <p class="lead">Absolwent warszawskiego AWF, specjalizujący się w nowoczesnej rehabilitacji funkcjonalnej.</p>
+                    <div class="about-description">
+                        <p>Moja praca opiera się na holistycznym podejściu do pacjenta. Specjalizuję się w masażu głębokim tkanek miękkich, rehabilitacji pooperacyjnej oraz fizjoterapii stomatologicznej.</p>
+                        <p>Jako certyfikowany terapeuta manualny, pomagam pacjentom wrócić do pełnej sprawności po urazach sportowych oraz w chronicznych dolegliwościach bólowych.</p>
+                    </div>
+                </div>
+                <div class="about-visual">
+                    <div class="image-container reveal">
+                        <img src="img/maciej_portret.png" alt="Maciej Liedel" class="about-portrait-img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja Lokalizacja -->
+        <section id="location" class="section location-section">
+            <div class="container">
+                <div class="section-intro">
+                    <span class="bento-tag">Gabinety</span>
+                    <h2 class="section-title">Znajdź mnie w Warszawie i Radzyminie</h2>
+                </div>
+
+                <div class="map-grid">
+                    <div class="map-visual reveal">
+                        <img src="img/satellite.png" alt="Widok satelitarny okolicy" class="satellite-img">
+                        <div class="map-label">Widok Satelitarny - Warszawa</div>
+                    </div>
+                    <div class="map-embed reveal">
+                        <iframe 
+                            src="https://maps.google.com/maps?q=Sewerynów%206,%20Warszawa&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                            width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+
+                <div class="location-details grid-2">
+                    <div class="loc-card reveal">
+                        <h3>Warszawa Śródmieście</h3>
+                        <p>ul. Sewerynów 6, lok. 1D<br>00-331 Warszawa</p>
+                        <div class="directions">
+                            <strong>Jak dojechać:</strong>
+                            <p>Gabinet znajduje się w ścisłym centrum, w pobliżu Kampusu Głównego UW. Wejście bezpośrednio od ulicy Sewerynów. Parkowanie dostępne wzdłuż ulicy (Strefa Płatnego Parkowania).</p>
+                        </div>
+                    </div>
+                    <div class="loc-card reveal">
+                        <h3>Radzymin (Centrum Kinesis)</h3>
+                        <p>ul. Juliusza Słowackiego 2, lok. 14<br>05-250 Radzymin</p>
+                        <div class="directions">
+                            <strong>Jak dojechać:</strong>
+                            <p>Centrum Kinesis znajduje się w sercu Radzymina. Dla pacjentów dostępny jest bezpłatny parking bezpośrednio przy budynku.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja Formularz AI -->
+        <section id="ai-consult" class="section ai-section">
+            <div class="container">
+                <div class="ai-card">
+                    <div class="ai-header">
+                        <h2>Konsultacja Wstępna AI</h2>
+                        <p>Opisz swój problem, a nasz asystent przygotuje wstępny brief dla fizjoterapeuty.</p>
+                    </div>
+                    <div class="ai-form-container">
+                        <textarea id="ai-input" placeholder="Opisz gdzie czujesz ból, jak długo trwa i czy posiadasz dokumentację medyczną..."></textarea>
+                        <div class="form-actions">
+                            <label class="file-upload">
+                                <input type="file" multiple>
+                                <span>Załącz dokumentację (RTG/MR)</span>
+                            </label>
+                            <button id="ai-submit" class="btn-primary">Generuj Analizę</button>
+                        </div>
+                    </div>
+                    <div id="ai-response" class="hidden"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Maciej Liedel Fizjoterapia. Wszystkie prawa zastrzeżone.</p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

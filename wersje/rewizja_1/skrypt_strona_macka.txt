@@ -1,0 +1,86 @@
+Role: Expert Medical Web Developer & UI/UX Designer
+Task: Create an innovative, high-end Physiotherapy Portfolio for Maciej Liedel.
+
+1. Aesthetic & Movement (Style Guide):
+- Design: "Kinetic Precision" / Clinical Premium / Bio-Tech Minimalist.
+- Modes: Full support for Dark & Light modes.
+- Palette (Light):
+    - Background: Pure White (#FFFFFF).
+    - Primary Accent: Deep Kinetic Blue (#1a4b84).
+    - Secondary: Soft Sage (#e8f0f2).
+- Palette (Dark):
+    - Background: Deep Navy (#0b1622).
+    - Primary Accent: Electric Cyan (#00f2ff).
+    - Secondary: Slate Glass (#162a3d).
+- Typography:
+    - Headers: Outfit (Bold/SemiBold).
+    - Body: Inter (Regular/Medium).
+
+2. Structural Concept (Bento-Hero):
+- The Hero section is a dynamic 3x2 Bento-box grid.
+- Each tile is a primary navigation button with a unique interactive hover effect.
+- Tiles:
+    1. O MNIE (About)
+    2. USŁUGI (Services)
+    3. PUBLIKACJE (Publications)
+    4. LOKALIZACJA (Location)
+    5. CENNIK (Pricing)
+    6. KONSULTACJA AI (AI Form)
+
+3. Section 1: Hero (Navigation Hub)
+- Layout: Full-screen bento grid.
+- Interaction: Tiles scale (1.02) and change shadow/glow on hover. Transition to section on click.
+
+4. Section 2: O mnie (Specialist Profile)
+- Content: Based on Maciej Liedel (Centrum Kinesis).
+- Focus: Manual therapy, sports injuries, physiotherapy for jaw joints (TMJ), and functional training.
+- Visual: Large professional portrait with "Medical Blueprint" overlays.
+
+5. Section 3: Usługi (Treatment Catalog)
+- Style: Clean grid with minimalist icons.
+- Categories: Terapia Manualna, Fizjoterapia Stomatologiczna, Przygotowanie Motoryczne, Rehabilitacja Pooperacyjna.
+
+6. Section 4: AI Consultation Wizard (Physio-Diagnostic)
+- Dual-Mode: Voice/Text.
+- Smart Questions:
+    - "Gdzie odczuwasz dyskomfort?" (Mapping anatomical areas).
+    - "Jak opisałbyś ból? (Ostry, tępy, promieniujący)".
+    - "Od jak dawna trwa problem?".
+- Feature: Technical Documentation Attachment (Upload support for MRI/RTG reports).
+- Goal: Generate a professional patient brief for Maciej before the visit.
+
+7. Technical Workflow:
+- Use CSS Variables for easy Light/Dark mode switching.
+- GSAP for smooth section transitions.
+- Responsive design: Bento grid collapses to 2x3 or 1x6 on mobile.
+
+---
+PL:
+1. Styl: "Kinetic Precision" - medyczny minimalizm, tryb jasny/ciemny.
+2. Hero: Grid 3x2 (6 kafelków jako przyciski nawigacyjne).
+3. AI Wizard: Wywiad fizjoterapeutyczny, analiza bólu, przesyłanie dokumentacji (MR/RTG).
+4. O mnie: mgr Maciej Liedel - specjalista terapii manualnej i stomatologicznej.
+
+8. Data & Business Logic:
+- Booksy Link: https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1
+- Locations: 
+    - Warszawa: ul. Sewerynów 6, lok. 1D (Śródmieście)
+    - Radzymin: ul. Juliusza Słowackiego 2, lok. 14 (Centrum Kinesis)
+- Services (Base Price: 250 PLN / 55 min):
+    - Fizjoterapia Stomatologiczna (TMJ, bruksizm)
+    - Chiropraktyka / Terapia Manualna
+    - Fizjoterapia Sportowa
+    - Rehabilitacja Pooperacyjna
+    - Suche Igłowanie (📍)
+    - Konsultacja Fizjoterapeutyczna (🧠)
+
+9. Version Control Workflow:
+- Every major change is saved in the /wersje/ folder as a separate revision.
+- Each revision contains a ZMIANY.txt log in Polish.
+- Revision 1: Initial stable build with Bento Grid, Booksy integration, and Dual-Map location.
+
+---
+PL:
+- Adresy: Sewerynów 6 (Warszawa), Słowackiego 2 (Radzymin).
+- Ceny: Standard 250 PLN / 55 min.
+- Logika: Dual-Map (Satelita + Google Maps).

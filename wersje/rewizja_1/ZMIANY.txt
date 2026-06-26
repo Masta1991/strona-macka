@@ -1,0 +1,12 @@
+LOG ZMIAN - REWIZJA 1 (Initial Stable Build)
+-------------------------------------------
+Data: 2026-05-04
+
+GŁÓWNE FUNKCJE:
+1. System "Kinetic Precision": Wdrożenie innowacyjnego designu z trybem jasnym i ciemnym (Dark/Light Toggle).
+2. Bento-Hero: Główna nawigacja w formie interaktywnej siatki kafelków z tłem graficznym i efektem hover-zoom.
+3. Katalog Usług: Rozpisanie szczegółowej oferty na podstawie Booksy (Fizjoterapia stomatologiczna, sportowa, manualna itd.).
+4. Integracja Rezerwacji: Podpięcie bezpośredniego linku Booksy pod przyciski CTA.
+5. Sekcja Lokalizacja: Dual-Map system (widok satelitarny + interaktywna mapa Google) dla Warszawy (Sewerynów 6) i Radzymina.
+6. Personalizacja: Wdrożenie profesjonalnego portretu Macieja Liedela w sekcji O Mnie i Hero.
+7. AI Wizard: Wstępna struktura asystenta wywiadu medycznego z obsługą załączników.
