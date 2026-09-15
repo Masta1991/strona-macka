@@ -127,6 +127,20 @@
         <section id="tab-dokumentacja" class="hidden">
             <p class="lead">Karta wizyty w duchu Karty Indywidualnej Opieki Fizjoterapeutycznej (rozp. MZ z 6.04.2020): wpis niezwłocznie po wizycie, z podpisem. Pełną dokumentację gabinetu prowadź w systemie — tu przygotowujesz treść roboczą i wydruk dla pacjenta.</p>
             <p class="panel-note">Prywatność: do modelu AI trafia <strong>wyłącznie opis kliniczny</strong> (dolegliwości, badanie, procedury). Dane pacjenta — kod, e-mail, telefon, PESEL — wpisujesz <strong>ręcznie poniżej i nigdy nie trafiają do AI</strong>. Dyktowanie działa lokalnie w przeglądarce.</p>
+            <div class="dict-hero">
+                <div>
+                    <h3>🎙 Podyktuj wizytę — AI wypełni kartę</h3>
+                    <p>Opowiedz swobodnie przebieg wizyty: dolegliwości, badanie, co wykonano, zalecenia. <strong>Nie wymawiaj nazwiska, PESEL-u, telefonu ani e-maila</strong> — te dane dopiszesz ręcznie poniżej. Potem AI rozłoży nagranie na pola karty i zaznaczy procedury.</p>
+                </div>
+                <button id="doc-dict-big" class="dict-big" type="button">🎙 Rozpocznij dyktowanie</button>
+                <p id="doc-dict-status" class="plan-msg" role="status"></p>
+                <div id="doc-transcript" class="transcript hidden" aria-live="polite"></div>
+                <div class="planner-actions">
+                    <button id="doc-dict-ai" class="btn-primary hidden" type="button">Przetwórz przez AI i wypełnij kartę</button>
+                    <button id="doc-dict-clear" class="btn-link hidden" type="button">Wyczyść nagranie</button>
+                </div>
+            </div>
+            <h3 class="manual-head">Wpis ręczny — pola karty i dane wrażliwe (bez AI)</h3>
             <div class="doc-grid">
                 <div class="planner-form">
                     <label>Wizyta z kalendarza <select id="doc-visit"><option value="">— nowa / spoza listy —</option></select></label>

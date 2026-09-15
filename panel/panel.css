@@ -14,6 +14,17 @@
 .visit-row small { display: block; color: var(--text-secondary); }
 .visit-row button { border: 0; background: none; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary); }
 @media (max-width: 900px) { .cal-grid { grid-template-columns: 1fr; } }
+.visit-form input, .visit-form select, .visit-form button { min-width: 0; max-width: 100%; }
+.visit-form { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); }
+@media (max-width: 768px) {
+    .panel-main { padding-top: 6rem; }
+    .panel-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: .4rem; }
+    .panel-tabs button { white-space: nowrap; flex: 0 0 auto; }
+    .visit-form { grid-template-columns: 1fr; }
+    .visit-form button[type="submit"] { width: 100%; }
+    .email-row button, .planner-actions button { width: 100%; }
+    .video-modal { width: 96vw; }
+}
 .doc-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; margin-top: 1rem; }
 .dict-wrap { display: grid; gap: .4rem; }
 .dict-btn { justify-self: start; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-primary); border-radius: 99px; padding: .45rem 1rem; cursor: pointer; font: inherit; font-size: .85rem; }
@@ -23,6 +34,14 @@
 .row-btns button { border: 1px solid var(--card-border); background: transparent; color: var(--text-primary); border-radius: .5rem; padding: .3rem .7rem; cursor: pointer; }
 @media (max-width: 900px) { .doc-grid { grid-template-columns: 1fr; } }
 .visit-row.is-past { opacity: .62; }
+.dict-hero { border: 2px solid var(--accent-primary); border-radius: 1.25rem; padding: 1.5rem 1.75rem; margin: 1.25rem 0 1.75rem; background: var(--card-bg); display: grid; gap: .9rem; }
+.dict-hero h3 { margin: 0; }
+.dict-hero p { margin: 0; color: var(--text-secondary); }
+.dict-big { justify-self: start; font-size: 1.15rem; font-weight: 700; border: 0; border-radius: 99px; padding: 1rem 2rem; cursor: pointer; background: var(--accent-primary); color: #fff; min-height: 56px; }
+.dict-big.rec { background: #dc2626; animation: pulse 1.2s infinite; }
+.transcript { max-height: 220px; overflow-y: auto; background: var(--bg-primary); border: 1px solid var(--card-border); border-radius: .75rem; padding: .9rem 1.1rem; white-space: pre-wrap; }
+.manual-head { margin-top: .5rem; }
+@media (max-width: 768px) { .dict-big { width: 100%; justify-self: stretch; } }
 .past-tag { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; border: 1px solid var(--card-border); border-radius: 99px; padding: .1rem .55rem; margin-left: .4rem; }
 .thumb-btn { display: block; width: 100%; border: 0; padding: 0; margin: .6rem 0; border-radius: .75rem; overflow: hidden; cursor: pointer; position: relative; background: #000; text-align: left; }
 .thumb-btn img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; opacity: .92; }

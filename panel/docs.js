@@ -117,6 +117,60 @@ document.addEventListener('DOMContentLoaded', () => {
         rec.start();
     });
 
+    // ---------- duże dyktowanie wizyty → AI wypełnia kartę ----------
+    let bigText = '', bigRec = null;
+    const bigBtn = $('doc-dict-big'), bigStatus = $('doc-dict-status');
+    const bigBox = $('doc-transcript'), bigAi = $('doc-dict-ai'), bigClear = $('doc-dict-clear');
+    bigBtn.onclick = () => {
+        if (!SR) { bigStatus.textContent = 'Dyktowanie wymaga Chrome lub Edge (komputer/telefon, najlepiej HTTPS lub localhost).'; return; }
+        if (bigRec) { bigRec.stop(); return; }
+        if (rec) rec.stop();
+        bigRec = new SR(); bigRec.lang = 'pl-PL'; bigRec.interimResults = true; bigRec.continuous = true;
+        bigBtn.classList.add('rec'); bigBtn.textContent = '⏹ Zatrzymaj dyktowanie';
+        bigStatus.textContent = 'Słucham... opowiedz przebieg wizyty. Pamiętaj: bez nazwiska, PESEL-u i telefonu.';
+        bigBox.classList.remove('hidden');
+        bigRec.onresult = (e) => {
+            let interim = '', fin = '';
+            for (const r of e.results) { if (r.isFinal) fin += r[0].transcript + ' '; else interim += r[0].transcript; }
+            bigText += fin;
+            bigBox.textContent = bigText + interim;
+            bigBox.scrollTop = bigBox.scrollHeight;
+        };
+        bigRec.onend = () => {
+            bigBtn.classList.remove('rec'); bigBtn.textContent = '🎙 Rozpocznij dyktowanie'; bigRec = null;
+            if (bigText.trim()) {
+                bigStatus.textContent = 'Nagranie gotowe. Sprawdź tekst, potem przetwórz przez AI albo przepisz ręcznie poniżej.';
+                bigAi.classList.remove('hidden'); bigClear.classList.remove('hidden');
+            } else bigStatus.textContent = 'Nic nie usłyszałem — spróbuj ponownie.';
+        };
+        bigRec.onerror = (e) => {
+            bigBtn.classList.remove('rec'); bigBtn.textContent = '🎙 Rozpocznij dyktowanie'; bigRec = null;
+            bigStatus.textContent = e.error === 'not-allowed' ? 'Zablokowany mikrofon — zezwól w przeglądarce.' : 'Błąd dyktowania. Możesz wpisać tekst ręcznie poniżej.';
+        };
+        bigRec.start();
+    };
+    bigClear.onclick = () => { bigText = ''; bigBox.textContent = ''; bigBox.classList.add('hidden'); bigAi.classList.add('hidden'); bigClear.classList.add('hidden'); bigStatus.textContent = ''; };
+    bigAi.onclick = async () => {
+        if (!bigText.trim()) return;
+        if (!$('doc-ai-consent').checked) { bigStatus.textContent = 'Najpierw zaznacz potwierdzenie prywatności pod kartą.'; $('doc-ai-consent').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+        bigStatus.textContent = 'AI rozkłada nagranie na pola karty...';
+        try {
+            const out = await aiAsk(
+                SYS + ' Z nagrania terapeuty wyodrębnij dane do karty wizyty. Odpowiedz WYŁĄCZNIE poprawnym JSON: {"subj":"...","obj":"...","assess":"...","icf":"...","proc":["..."],"plan":"..."}. Procedury dobieraj tylko z listy: Terapia manualna, Masaż tkanek głębokich, Suche igłowanie, Kinesiotaping, Ćwiczenia nadzorowane, Edukacja pacjenta. Puste pola jako "". Bez komentarzy poza JSON.',
+                bigText);
+            const json = JSON.parse(out.slice(out.indexOf('{'), out.lastIndexOf('}') + 1));
+            if (json.subj) $('doc-subj').value = json.subj;
+            if (json.obj) $('doc-obj').value = json.obj;
+            if (json.assess) $('doc-assess').value = json.assess;
+            if (json.icf) $('doc-icf').value = json.icf;
+            if (json.plan) $('doc-plan').value = json.plan;
+            if (Array.isArray(json.proc)) document.querySelectorAll('#doc-proc input').forEach(c => {
+                c.checked = json.proc.some(p => c.value.toLowerCase().includes(String(p).toLowerCase()) || String(p).toLowerCase().includes(c.value.toLowerCase()));
+            });
+            bigStatus.textContent = 'Karta wypełniona ✓ Sprawdź pola, dopisz dane pacjenta ręcznie i zapisz.';
+        } catch (e) { bigStatus.textContent = 'Błąd AI: ' + e.message + ' — nagranie zostaje, przepisz ręcznie poniżej.'; }
+    };
+
     // ---------- karty wizyt ----------
     const safeLoad = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (_) { return fb; } };
     const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
