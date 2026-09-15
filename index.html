@@ -30,6 +30,7 @@
                     <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                     <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                 </button>
+                <a href="panel/index.html" class="nav-ghost">Panel fizjoterapeuty</a>
                 <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" class="nav-cta">Umów wizytę</a>
             </div>
         </div>
@@ -157,6 +158,15 @@
                 </div>
 
                 <div class="services-footer">
+                    <div class="visit-steps reveal">
+                        <h3>Jak wygląda pierwsza wizyta?</h3>
+                        <ol>
+                            <li><strong>Wywiad i badanie (20 min):</strong> historia urazu, testy funkcjonalne, palpacja. Możesz wypełnić <a href="#ai-consult">wywiad online</a> przed wizytą — oszczędzamy czas na terapię.</li>
+                            <li><strong>Diagnoza i plan (15 min):</strong> jasne wyjaśnienie przyczyny bólu i plan: ile wizyt, jakie ćwiczenia, jakie badania (USG/MRI) jeśli potrzebne.</li>
+                            <li><strong>Terapia (20 min):</strong> terapia manualna / igłowanie / techniki tkanek miękkich + instruktaż ćwiczeń domowych z filmami.</li>
+                        </ol>
+                    </div>
+                    <p class="price-note reveal">Wszystkie wizyty: <strong>55 min / 250 zł</strong>. Płatność BLIK / gotówka / przelew. Odwołanie bez kosztów do 24 h przed wizytą.</p>
                     <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" class="btn-primary">Zobacz pełną listę na Booksy</a>
                 </div>
             </div>
@@ -171,6 +181,14 @@
                     <div class="about-description">
                         <p>Moja praca opiera się na holistycznym podejściu do pacjenta. Specjalizuję się w masażu głębokim tkanek miękkich, rehabilitacji pooperacyjnej oraz fizjoterapii stomatologicznej.</p>
                         <p>Jako certyfikowany terapeuta manualny, pomagam pacjentom wrócić do pełnej sprawności po urazach sportowych oraz w chronicznych dolegliwościach bólowych.</p>
+                        <ul class="credentials">
+                            <li><strong>AWF Warszawa</strong> — magister fizjoterapii</li>
+                            <li><strong>Terapia manualna i chiropraktyka</strong> — mobilizacje i manipulacje kręgosłupa oraz stawów obwodowych</li>
+                            <li><strong>Fizjoterapia stomatologiczna (TMJ)</strong> — bruksizm, trzaski żuchwy, napięciowe bóle głowy</li>
+                            <li><strong>Suche igłowanie</strong> — punkty spustowe i przewlekłe napięcia mięśniowe</li>
+                            <li><strong>Trening medyczny</strong> — powrót do sportu po urazach i operacjach (m.in. kolano, bark)</li>
+                        </ul>
+                        <p class="about-note">Pracuję w oparciu o dowody: moje zalecenia znajdziesz z omówieniem badań w sekcji <a href="#publications">Publikacje</a>.</p>
                     </div>
                 </div>
                 <div class="about-visual">
@@ -223,6 +241,22 @@
             </div>
         </section>
 
+        <!-- Sekcja Publikacje -->
+        <section id="publications" class="section publications-section">
+            <div class="container">
+                <div class="section-intro">
+                    <span class="bento-tag">Wiedza</span>
+                    <h2 class="section-title">Publikacje, na których pracuję</h2>
+                    <p class="lead">Najświeższe badania o kolanie, urazach i fizjoterapii — w krótkim streszczeniu po polsku, z linkiem do oryginału. Pełna lista badań w moich notatkach klinicznych.</p>
+                </div>
+                <div id="pub-list" class="pub-list"></div>
+                <div class="curiosities reveal">
+                    <h3>Ciekawostki fizjoterapeutyczne</h3>
+                    <div id="curio-list" class="curio-grid"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- Sekcja Formularz AI (Interactive Wizard) -->
         <section id="ai-consult" class="section ai-section">
             <div class="container">
@@ -231,17 +265,36 @@
                         <div class="ai-header">
                             <span class="ai-badge">AI Diagnostic Assistant</span>
                             <h2>Innowacyjny Wywiad Fizjoterapeutyczny</h2>
-                            <p>Skorzystaj z naszego inteligentnego asystenta, aby przygotować się do wizyty.</p>
+                            <p>Cztery krótkie kroki: bezpieczeństwo, mapa bólu, szczegóły, gotowy brief dla Macieja. To nie jest diagnoza — to przygotowanie do wizyty.</p>
                         </div>
-                        <button id="start-wizard" class="btn-primary">Wypełnij formularz</button>
+                        <label class="consent"><input type="checkbox" id="rodo-consent"> Wyrażam zgodę na przetwarzanie podanych tu informacji o zdrowiu wyłącznie w celu przygotowania wizyty u Macieja Liedela (opis nie opuszcza Twojej przeglądarki — wysyłasz go sam, np. mailem).</label>
+                        <button id="start-wizard" class="btn-primary">Rozpocznij wywiad</button>
+                        <p id="consent-error" class="form-error hidden">Zaznacz zgodę, aby przejść dalej.</p>
                     </div>
 
                     <div id="wizard-step-1" class="wizard-step hidden">
                         <div class="ai-header">
-                            <h3>KROK 1: Wskaż miejsce bólu</h3>
+                            <h3>KROK 1 z 4: Bezpieczeństwo</h3>
+                            <p>Zaznacz, jeśli coś z listy dotyczy Ciebie. Przy tych objawach nie czekaj na ćwiczenia z internetu.</p>
+                        </div>
+                        <div class="redflags" id="redflags">
+                            <label><input type="checkbox" value="gorączka po urazie / infekcja"> Gorączka, dreszcze lub zaczerwienienie i gorąco wokół stawu</label>
+                            <label><input type="checkbox" value="świeży uraz z deformacją"> Świeży uraz z widoczną deformacją, trzaskiem i brakiem obciążania nogi</label>
+                            <label><input type="checkbox" value="drętwienie / opadanie stopy"> Postępujące drętwienie, osłabienie nogi lub opadanie stopy</label>
+                            <label><input type="checkbox" value="problemy z oddawaniem moczu"> Nagłe problemy z oddawaniem moczu / stolcem przy bólu kręgosłupa</label>
+                            <label><input type="checkbox" value="ból w klatce / duszność"> Ból w klatce piersiowej, duszność lub omdlenie</label>
+                            <label><input type="checkbox" value="ból żuchwy z gorączką"> Ból żuchwy z gorączką, obrzękiem twarzy lub szczękościskiem po zabiegu</label>
+                        </div>
+                        <div id="redflag-alert" class="redflag-alert hidden" role="alert"></div>
+                        <div class="wizard-nav"><button id="to-step-2a" class="btn-primary">Dalej: mapa bólu</button></div>
+                    </div>
+
+                    <div id="wizard-step-2" class="wizard-step hidden">
+                        <div class="ai-header">
+                            <h3>KROK 2 z 4: Wskaż miejsce bólu</h3>
                             <p>Kliknij na obszar ciała. Możesz przełączyć widok przód/tył.</p>
                         </div>
-                        
+
                         <div class="view-toggle">
                             <button id="toggle-front" class="btn-toggle active">Przód</button>
                             <button id="toggle-back" class="btn-toggle">Tył</button>
@@ -288,36 +341,82 @@
                                 <circle class="body-part joint" cx="128" cy="450" r="6" data-name="Staw skokowy prawy"/>
                             </svg>
 
-                            <!-- MANNEQUIN BACK (V3 - INTERACTIVE JOINTS) -->
+                            <!-- MANNEQUIN BACK (V4 - FULL BODY) -->
                             <svg id="body-back" viewBox="0 0 200 500" class="body-svg mannequin hidden">
                                 <ellipse class="body-part" cx="100" cy="45" rx="14" ry="22" data-name="Potylica / Górny kręgosłup"/>
                                 <path class="body-part" d="M70,80 Q100,75 130,80 L135,130 Q100,140 65,130 Z" data-name="Górny grzbiet / Łopatki"/>
                                 <rect class="body-part" x="97" y="80" width="6" height="150" rx="3" data-name="Kręgosłup piersiowy/lędźwiowy"/>
-                                <circle class="body-part joint" cx="100" cy="155" r="7" data-name="Przejście Th-L"/>
+                                <circle class="body-part joint" cx="100" cy="155" r="7" data-name="Przejście piersiowo-lędźwiowe"/>
                                 <path class="body-part" d="M75,165 Q100,160 125,165 L130,220 Q100,230 70,220 Z" data-name="Lędźwia / Krzyż"/>
+                                <circle class="body-part joint" cx="62" cy="90" r="8" data-name="Staw barkowy lewy (tył)"/>
+                                <circle class="body-part joint" cx="138" cy="90" r="8" data-name="Staw barkowy prawy (tył)"/>
+                                <circle class="body-part joint" cx="54" cy="160" r="6" data-name="Staw łokciowy lewy (tył)"/>
+                                <circle class="body-part joint" cx="146" cy="160" r="6" data-name="Staw łokciowy prawy (tył)"/>
+                                <path class="body-part" d="M72,245 L65,330 L85,330 L92,245 Z" data-name="Udo lewe (tył)"/>
+                                <path class="body-part" d="M128,245 L135,330 L115,330 L108,245 Z" data-name="Udo prawe (tył)"/>
+                                <circle class="body-part joint" cx="75" cy="345" r="7" data-name="Staw kolanowy lewy (tył)"/>
+                                <circle class="body-part joint" cx="125" cy="345" r="7" data-name="Staw kolanowy prawy (tył)"/>
+                                <path class="body-part" d="M70,355 L65,440 L80,440 L85,355 Z" data-name="Łydka lewa"/>
+                                <path class="body-part" d="M130,355 L135,440 L120,440 L115,355 Z" data-name="Łydka prawa"/>
+                                <circle class="body-part joint" cx="72" cy="450" r="6" data-name="Staw skokowy lewy (tył)"/>
+                                <circle class="body-part joint" cx="128" cy="450" r="6" data-name="Staw skokowy prawy (tył)"/>
                                 <circle class="body-part joint" cx="80" cy="235" r="9" data-name="Staw krzyżowo-biodrowy lewy"/>
                                 <circle class="body-part joint" cx="120" cy="235" r="9" data-name="Staw krzyżowo-biodrowy prawy"/>
                             </svg>
                         </div>
                         <div id="selected-part-label">Wybierz obszar na modelu...</div>
-                        <button id="to-step-2" class="btn-primary hidden">Dalej</button>
+                        <div class="wizard-nav"><button id="to-step-1" class="btn-link">Wstecz</button><button id="to-step-2" class="btn-primary hidden">Dalej: szczegóły</button></div>
                     </div>
 
-                    <div id="wizard-step-2" class="wizard-step hidden">
+                    <div id="wizard-step-3" class="wizard-step hidden">
                         <div class="ai-header">
-                            <h3>KROK 2: Szczegóły i Dokumentacja</h3>
-                            <p>AI wygenerowało wstępny opis. Możesz go edytować i dodać załączniki.</p>
+                            <h3>KROK 3 z 4: Szczegóły dolegliwości</h3>
+                            <p>Im dokładniej opiszesz ból, tym lepszy brief dostanie Maciej.</p>
                         </div>
                         <div class="ai-form-container">
-                            <textarea id="ai-input" placeholder="Opisz swoje dolegliwości..."></textarea>
+                            <fieldset class="pain-types" id="pain-types">
+                                <legend>Rodzaj bólu (możesz zaznaczyć kilka)</legend>
+                                <label><input type="checkbox" value="kłujący"> Kłujący</label>
+                                <label><input type="checkbox" value="tępy"> Tępy</label>
+                                <label><input type="checkbox" value="piekący"> Piekący</label>
+                                <label><input type="checkbox" value="promieniujący"> Promieniujący</label>
+                                <label><input type="checkbox" value="drętwienie / mrowienie"> Drętwienie / mrowienie</label>
+                                <label><input type="checkbox" value="sztywność"> Sztywność</label>
+                            </fieldset>
+                            <label class="vas-label">Nasilenie bólu: <strong><span id="vas-value">5</span>/10</strong>
+                                <input type="range" id="vas" min="0" max="10" value="5">
+                            </label>
+                            <div class="form-grid-2">
+                                <label>Od jak dawna?
+                                    <select id="pain-duration">
+                                        <option>Kilka dni</option>
+                                        <option>2–6 tygodni</option>
+                                        <option>1–3 miesiące</option>
+                                        <option>Powyżej 3 miesięcy</option>
+                                        <option>Nawracający od lat</option>
+                                    </select>
+                                </label>
+                                <label>Jak się zaczęło?
+                                    <select id="pain-onset">
+                                        <option>Nagły uraz (upadek, skręt, kontakt)</option>
+                                        <option>Przeciążenie (trening, praca)</option>
+                                        <option>Po zabiegu / operacji</option>
+                                        <option>Stopniowo, bez uchwytnej przyczyny</option>
+                                        <option>Po zabiegu stomatologicznym</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <textarea id="ai-input" placeholder="Opisz swoje dolegliwości: co nasila ból, co pomaga, jakie badania już masz..."></textarea>
                             <div class="form-actions">
                                 <label class="file-upload">
-                                    <input type="file" id="medical-docs" multiple>
-                                    <span id="file-label">➕ Załącz dokumentację (RTG/MR)</span>
+                                    <input type="file" id="medical-docs" multiple accept=".pdf,.jpg,.jpeg,.png,.dcm">
+                                    <span id="file-label">➕ Załącz dokumentację (RTG/MR, max 10 MB / plik)</span>
                                 </label>
-                                <button id="ai-final-submit" class="btn-primary">Generuj Analizę</button>
+                                <button id="ai-final-submit" class="btn-primary">Generuj brief (krok 4)</button>
                             </div>
+                            <p class="file-note">Pliki nie są nigdzie wysyłane — lista załączników trafia tylko do Twojego briefu, który sam przekazujesz. Duże pliki DICOM prześlij mailem przed wizytą.</p>
                         </div>
+                        <div class="wizard-nav"><button id="to-step-2-back" class="btn-link">Wstecz</button></div>
                     </div>
 
                     <div id="ai-response" class="hidden"></div>
@@ -332,6 +431,7 @@
         </div>
     </footer>
 
+    <script src="publications.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
