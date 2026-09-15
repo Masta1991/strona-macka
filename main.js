@@ -173,9 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 900);
     };
 
-    // 6. Smooth scrolling
+    // 6. Smooth scrolling (offset = realna wysokość paska + zapas)
     document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', (e) => {
         const t = document.querySelector(a.getAttribute('href'));
-        if (t) { e.preventDefault(); window.scrollTo({ top: t.offsetTop - 80, behavior: 'smooth' }); }
+        if (t) {
+            e.preventDefault();
+            const navH = document.querySelector('.navbar')?.offsetHeight || 80;
+            window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - navH - 12, behavior: 'smooth' });
+        }
     }));
 });

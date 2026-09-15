@@ -868,3 +868,7 @@ h1, h2, h3 {
     .brief-actions .btn-primary, .brief-actions .btn-secondary { width: 100%; text-align: center; }
     .planner-actions .btn-primary, .planner-actions .btn-secondary { width: 100%; text-align: center; }
 }
+
+/* Kotwice nigdy nie wchodza pod staly pasek (tez mobilnie) */
+section[id] { scroll-margin-top: 100px; }
+@media (max-width: 768px) { section[id] { scroll-margin-top: 130px; } }
