@@ -1,283 +1,151 @@
-/* Dokumentacja wizyty (KIOF-roboczo) + Asystent AI (OpenRouter/OpenAI/ custom) + dyktowanie. */
-document.addEventListener('DOMContentLoaded', () => {
-    const $ = (id) => document.getElementById(id);
-    const msg = (t) => { $('doc-msg').textContent = t; };
-
-    // ---------- ustawienia AI ----------
-    const aiGet = () => ({
-        provider: localStorage.getItem('maciej_ai_provider') || 'openrouter',
-        url: localStorage.getItem('maciej_ai_url') || '',
-        key: localStorage.getItem('maciej_ai_key') || '',
-        model: localStorage.getItem('maciej_ai_model') || 'openai/gpt-4o-mini',
-        opBase: (localStorage.getItem('maciej_ai_opbase') || 'http://127.0.0.1:4096').replace(/\/$/, ''),
-        opUser: localStorage.getItem('maciej_ai_opuser') || '',
-        opPass: localStorage.getItem('maciej_ai_oppass') || ''
-    });
-    const aiShow = () => {
-        const s = aiGet();
-        $('ai-provider').value = s.provider; $('ai-url').value = s.url;
-        $('ai-key').value = s.key; $('ai-model').value = s.model;
-        $('ai-opbase').value = s.opBase; $('ai-opuser').value = s.opUser; $('ai-oppass').value = s.opPass;
-        $('ai-url-wrap').classList.toggle('hidden', s.provider !== 'custom');
-        $('ai-opencode-wrap').classList.toggle('hidden', s.provider !== 'opencode');
+/* Wywiad i karty: lokalne szkice, wersje, opcjonalne dyktowanie i redakcja AI. */
+(() => {
+    'use strict';
+    const P=window.Panel, {$,esc,read,readText,write,toast,go,confirmChange,dateLocal}=P;
+    const keys=['date','patient','subj','obj','assess','icf','plan','sign','email'];
+    const guideKeys=['area','pain','factors','history','goal'];
+    const defaultSign='Maciej Liedel, mgr fizjoterapii';
+    let docGoal='', revision=0, recognition=null, requestGeneration=0;
+    const proc=()=>[...document.querySelectorAll('#doc-proc input:checked')].map(input=>input.value);
+    const collect=()=>Object.fromEntries([...keys.map(key=>[key,$('doc-'+key).value.trim()]),['proc',proc()],['goal',docGoal]]);
+    const guide=()=>Object.fromEntries(guideKeys.map(key=>[key,$('intake-'+key).value]));
+    const saveDraft=()=>{
+        const ok=write('maciej_doc_draft',{...collect(),guide:guide(),transcript:$('doc-transcript').value});
+        P.setText('doc-draft-status',ok?'Szkic zapisany lokalnie':'Nie zapisano szkicu');
+        return ok;
     };
-    aiShow();
-    $('ai-provider').onchange = () => {
-        $('ai-url-wrap').classList.toggle('hidden', $('ai-provider').value !== 'custom');
-        $('ai-opencode-wrap').classList.toggle('hidden', $('ai-provider').value !== 'opencode');
+    const dirty=()=>keys.filter(k=>!['date','sign'].includes(k)).some(k=>$('doc-'+k).value.trim()) || proc().length || guideKeys.some(k=>$('intake-'+k).value.trim()) || $('doc-transcript').value.trim();
+    const msg=text=>{$('doc-msg').textContent=text;};
+    const stopRecording=()=>{if(recognition){recognition.onend=null;recognition.onresult=null;recognition.stop();recognition=null;}$('doc-dict-big').textContent='Rozpocznij dyktowanie';$('doc-dict-big').setAttribute('aria-pressed','false');};
+    const fill=data=>{
+        stopRecording();requestGeneration++;revision++;
+        keys.forEach(key=>$('doc-'+key).value=typeof data[key]==='string'?data[key]:(key==='date'?dateLocal():key==='sign'?defaultSign:''));
+        const procedures=Array.isArray(data.proc)?data.proc:[];
+        document.querySelectorAll('#doc-proc input').forEach(input=>input.checked=procedures.includes(input.value));
+        guideKeys.forEach(key=>$('intake-'+key).value=typeof data.guide?.[key]==='string'?data.guide[key]:'');
+        $('doc-transcript').value=typeof data.transcript==='string'?data.transcript:'';docGoal=typeof data.goal==='string'?data.goal:'';
+        $('doc-ai-consent').checked=false;$('speech-consent').checked=false;$('doc-dict-status').textContent='';$('doc-visit').value='';msg('');
     };
-    $('ai-save').onclick = () => {
-        localStorage.setItem('maciej_ai_provider', $('ai-provider').value);
-        localStorage.setItem('maciej_ai_url', $('ai-url').value.trim());
-        localStorage.setItem('maciej_ai_key', $('ai-key').value.trim());
-        localStorage.setItem('maciej_ai_model', $('ai-model').value.trim() || 'openai/gpt-4o-mini');
-        localStorage.setItem('maciej_ai_opbase', $('ai-opbase').value.trim() || 'http://127.0.0.1:4096');
-        localStorage.setItem('maciej_ai_opuser', $('ai-opuser').value.trim());
-        localStorage.setItem('maciej_ai_oppass', $('ai-oppass').value);
-        $('ai-msg').textContent = 'Zapisano w tej przeglądarce ✓';
+    fill(read('maciej_doc_draft',{}));
+    [...keys.map(k=>'doc-'+k),...guideKeys.map(k=>'intake-'+k),'doc-transcript'].forEach(id=>$(id).addEventListener('input',()=>{revision++;saveDraft();}));
+    document.querySelectorAll('#doc-proc input').forEach(input=>input.onchange=()=>{revision++;saveDraft();});
+    $('intake-apply').onclick=()=>{
+        if(!$('intake-pain').reportValidity())return;
+        const labels={area:'Obszar i czas trwania',pain:'Ból według pacjenta (0–10)',factors:'Co nasila / pomaga',history:'Historia i istotne informacje',goal:'Cel pacjenta'};
+        const g=guide();const text=guideKeys.filter(key=>g[key].trim()).map(key=>`${labels[key]}: ${g[key].trim()}`).join('\n');
+        if(!text){toast('Uzupełnij przynajmniej jedno pole pomocnika.');return;}
+        $('doc-subj').value=[$('doc-subj').value.trim(),text].filter(Boolean).join('\n\n');docGoal=g.goal.trim()||docGoal;
+        guideKeys.forEach(key=>$('intake-'+key).value='');revision++;saveDraft();$('doc-subj').focus();toast('Dodano odpowiedzi do wywiadu.');
     };
-    const aiEndpoint = () => {
-        const s = aiGet();
-        if (s.provider === 'openai') return 'https://api.openai.com/v1/chat/completions';
-        if (s.provider === 'custom') return s.url;
-        return 'https://openrouter.ai/api/v1/chat/completions';
+    const pendingGuide=()=>{if(guideKeys.some(key=>$('intake-'+key).value.trim())){document.querySelector('.interview-guide').open=true;$('intake-apply').focus();toast('Dodaj odpowiedzi z pomocnika do wywiadu przed zapisaniem lub eksportem.');return true;}return false;};
+    const valid=()=>{
+        if(pendingGuide())return false;
+        const d=collect();
+        for(const [key,label] of [['patient','Wpisz pacjenta lub jego kod.'],['date','Uzupełnij datę wizyty.']])if(!d[key]){msg(label);toast(label);$('doc-'+key).focus();return false;}
+        if(!['subj','obj','assess','plan'].some(key=>d[key])){msg('Uzupełnij wywiad, badanie lub zalecenia.');toast('Karta nie zawiera jeszcze notatki z wizyty.');$('doc-subj').focus();return false;}return true;
     };
-    // OpenCode serve: health-check + sesja + wiadomość (czeka na odpowiedź)
-    async function opencodeAsk(system, user) {
-        const s = aiGet();
-        const headers = { 'Content-Type': 'application/json' };
-        if (s.opUser || s.opPass) headers['Authorization'] = 'Basic ' + btoa(`${s.opUser || 'opencode'}:${s.opPass}`);
-        const call = async (path, opts) => {
-            const res = await fetch(s.opBase + path, { ...opts, headers });
-            if (res.status === 401) throw new Error('Serwer wymaga loginu/hasła (OPENCODE_SERVER_PASSWORD).');
-            if (!res.ok) throw new Error('OpenCode: HTTP ' + res.status);
-            return res.json();
-        };
-        const session = await call('/session', { method: 'POST', body: JSON.stringify({ title: 'Notatka fizjo' }) });
-        const body = { system, parts: [{ type: 'text', text: user }] };
-        const m = (s.model || '').trim();
-        if (m.includes('/')) { const [providerID, ...rest] = m.split('/'); body.model = { providerID, modelID: rest.join('/') }; }
-        const answer = await call(`/session/${session.id}/message`, { method: 'POST', body: JSON.stringify(body) });
-        const text = (answer.parts || []).filter(p => p.type === 'text').map(p => p.text).join('\n').trim();
-        if (!text) throw new Error('Serwer nie zwrócił tekstu.');
-        return text;
-    }
-    async function aiAsk(system, user) {
-        const s = aiGet();
-        if (s.provider === 'opencode') return opencodeAsk(system, user);
-        if (!s.key) throw new Error('Brak klucza API — uzupełnij zakładkę Asystent AI.');
-        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.key };
-        if (s.provider === 'openrouter') { headers['HTTP-Referer'] = location.href; headers['X-Title'] = 'Panel Fizjoterapeuty — Maciej Liedel'; }
-        const res = await fetch(aiEndpoint(), {
-            method: 'POST', headers,
-            body: JSON.stringify({ model: s.model, temperature: 0.3, max_tokens: 1500, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
-        });
-        if (!res.ok) throw new Error('API: ' + res.status);
-        const data = await res.json();
-        return data.choices[0].message.content.trim();
-    }
-    $('ai-test').onclick = async () => {
-        $('ai-msg').textContent = 'Testowanie...';
-        try {
-            if (aiGet().provider === 'opencode') {
-                const s = aiGet();
-                const headers = {};
-                if (s.opUser || s.opPass) headers['Authorization'] = 'Basic ' + btoa(`${s.opUser || 'opencode'}:${s.opPass}`);
-                const res = await fetch(s.opBase + '/global/health', { headers });
-                if (!res.ok) throw new Error('HTTP ' + res.status + ' — czy serwer działa (opencode serve) i zgadza się adres/CORS?');
-                const h = await res.json();
-                $('ai-msg').textContent = `Serwer działa ✓ (wersja ${h.version || '?'})`;
-            } else {
-                await aiAsk('Odpowiedz jednym słowem.', 'Test. Odpowiedz: OK');
-                $('ai-msg').textContent = 'Połączenie działa ✓';
-            }
-        }
-        catch (e) { $('ai-msg').textContent = 'Błąd: ' + e.message; }
+    const newPatient=async visit=>{
+        if((dirty()||P.planHasContent())&&!await confirmChange('Rozpocząć wizytę dla nowego pacjenta? Szkic karty i bieżący plan zostaną wyczyszczone. Zapisane karty i wersje planów pozostaną w historii.','Rozpocznij nową wizytę'))return false;
+        fill(visit?{patient:visit.client,date:visit.date}:{});P.resetPlan();saveDraft();go('dokumentacja');$('doc-patient').focus();return true;
     };
-
-    // ---------- dyktowanie (Web Speech API, pl-PL) ----------
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let rec = null, recTarget = null;
-    document.querySelectorAll('.dict-btn').forEach(btn => btn.onclick = () => {
-        if (!SR) { msg('Dyktowanie wymaga Chrome lub Edge na komputerze/telefonie.'); return; }
-        const ta = $(btn.dataset.target);
-        if (rec && recTarget === ta) { rec.stop(); return; }
-        if (rec) rec.stop();
-        rec = new SR(); rec.lang = 'pl-PL'; rec.interimResults = true; rec.continuous = true;
-        recTarget = ta;
-        btn.classList.add('rec'); btn.textContent = '⏹ Stop';
-        let base = ta.value ? ta.value.replace(/\s+$/, '') + ' ' : '';
-        rec.onresult = (e) => {
-            let interim = '', fin = '';
-            for (const r of e.results) { if (r.isFinal) fin += r[0].transcript + ' '; else interim += r[0].transcript; }
-            ta.value = base + fin + interim;
-        };
-        rec.onend = () => { btn.classList.remove('rec'); btn.textContent = '🎙 Dyktuj'; if (recTarget === ta) { rec = null; recTarget = null; } };
-        rec.onerror = () => { btn.classList.remove('rec'); btn.textContent = '🎙 Dyktuj'; };
-        rec.start();
-    });
-
-    // ---------- duże dyktowanie wizyty → AI wypełnia kartę ----------
-    let bigText = '', bigRec = null;
-    const bigBtn = $('doc-dict-big'), bigStatus = $('doc-dict-status');
-    const bigBox = $('doc-transcript'), bigAi = $('doc-dict-ai'), bigClear = $('doc-dict-clear');
-    bigBtn.onclick = () => {
-        if (!SR) { bigStatus.textContent = 'Dyktowanie wymaga Chrome lub Edge (komputer/telefon, najlepiej HTTPS lub localhost).'; return; }
-        if (bigRec) { bigRec.stop(); return; }
-        if (rec) rec.stop();
-        bigRec = new SR(); bigRec.lang = 'pl-PL'; bigRec.interimResults = true; bigRec.continuous = true;
-        bigBtn.classList.add('rec'); bigBtn.textContent = '⏹ Zatrzymaj dyktowanie';
-        bigStatus.textContent = 'Słucham... opowiedz przebieg wizyty. Pamiętaj: bez nazwiska, PESEL-u i telefonu.';
-        bigBox.classList.remove('hidden');
-        bigRec.onresult = (e) => {
-            let interim = '', fin = '';
-            for (const r of e.results) { if (r.isFinal) fin += r[0].transcript + ' '; else interim += r[0].transcript; }
-            bigText += fin;
-            bigBox.textContent = bigText + interim;
-            bigBox.scrollTop = bigBox.scrollHeight;
-        };
-        bigRec.onend = () => {
-            bigBtn.classList.remove('rec'); bigBtn.textContent = '🎙 Rozpocznij dyktowanie'; bigRec = null;
-            if (bigText.trim()) {
-                bigStatus.textContent = 'Nagranie gotowe. Sprawdź tekst, potem przetwórz przez AI albo przepisz ręcznie poniżej.';
-                bigAi.classList.remove('hidden'); bigClear.classList.remove('hidden');
-            } else bigStatus.textContent = 'Nic nie usłyszałem — spróbuj ponownie.';
-        };
-        bigRec.onerror = (e) => {
-            bigBtn.classList.remove('rec'); bigBtn.textContent = '🎙 Rozpocznij dyktowanie'; bigRec = null;
-            bigStatus.textContent = e.error === 'not-allowed' ? 'Zablokowany mikrofon — zezwól w przeglądarce.' : 'Błąd dyktowania. Możesz wpisać tekst ręcznie poniżej.';
-        };
-        bigRec.start();
+    document.querySelectorAll('[data-new-patient]').forEach(button=>button.onclick=()=>newPatient());
+    document.addEventListener('panel:open-visit',event=>newPatient(event.detail));
+    const fillVisitOptions=()=>{const sel=$('doc-visit');sel.replaceChildren(new Option('Nowa wizyta / spoza listy',''));P.getVisits().forEach((v,i)=>sel.append(new Option(`${v.date} ${v.time} — ${v.client}`,String(i))));};
+    fillVisitOptions();document.addEventListener('panel:visits',fillVisitOptions);
+    $('doc-visit').onchange=async()=>{const value=$('doc-visit').value;if(value==='')return;await newPatient(P.getVisits()[Number(value)]);$('doc-visit').value='';};
+    let docs=read('maciej_docs',[]).filter(d=>d && typeof d.patient==='string' && typeof d.date==='string').map(d=>({...d,proc:Array.isArray(d.proc)?d.proc:[]}));
+    const renderDocs=()=>{
+        const q=P.normalize($('doc-search').value);const matches=docs.map((d,index)=>({...d,index})).reverse().filter(d=>P.normalize(`${d.patient} ${d.date} ${d.assess||''}`).includes(q));
+        $('doc-list').innerHTML=matches.length?matches.map(d=>`<div class="record-row"><div><strong>${esc(d.patient)} · ${esc(d.date)}</strong><small>${esc(d.assess||'Karta wizyty')}</small></div><div class="row-btns"><button class="btn-secondary" data-doc-load="${d.index}">Otwórz</button><button class="icon-button" data-doc-remove="${d.index}" aria-label="Usuń kartę ${esc(d.patient)} ${esc(d.date)}">×</button></div></div>`).join(''):`<div class="empty">${q?'Nie znaleziono karty. Zmień wyszukiwanie.':'Zapisz pierwszą kartę, aby wrócić do niej później.'}</div>`;
+        P.counts();
     };
-    bigClear.onclick = () => { bigText = ''; bigBox.textContent = ''; bigBox.classList.add('hidden'); bigAi.classList.add('hidden'); bigClear.classList.add('hidden'); bigStatus.textContent = ''; };
-    bigAi.onclick = async () => {
-        if (!bigText.trim()) return;
-        if (!$('doc-ai-consent').checked) { bigStatus.textContent = 'Najpierw zaznacz potwierdzenie prywatności pod kartą.'; $('doc-ai-consent').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-        bigStatus.textContent = 'AI rozkłada nagranie na pola karty...';
-        try {
-            const out = await aiAsk(
-                SYS + ' Z nagrania terapeuty wyodrębnij dane do karty wizyty. Odpowiedz WYŁĄCZNIE poprawnym JSON: {"subj":"...","obj":"...","assess":"...","icf":"...","proc":["..."],"plan":"..."}. Procedury dobieraj tylko z listy: Terapia manualna, Masaż tkanek głębokich, Suche igłowanie, Kinesiotaping, Ćwiczenia nadzorowane, Edukacja pacjenta. Puste pola jako "". Bez komentarzy poza JSON.',
-                bigText);
-            const json = JSON.parse(out.slice(out.indexOf('{'), out.lastIndexOf('}') + 1));
-            if (json.subj) $('doc-subj').value = json.subj;
-            if (json.obj) $('doc-obj').value = json.obj;
-            if (json.assess) $('doc-assess').value = json.assess;
-            if (json.icf) $('doc-icf').value = json.icf;
-            if (json.plan) $('doc-plan').value = json.plan;
-            if (Array.isArray(json.proc)) document.querySelectorAll('#doc-proc input').forEach(c => {
-                c.checked = json.proc.some(p => c.value.toLowerCase().includes(String(p).toLowerCase()) || String(p).toLowerCase().includes(c.value.toLowerCase()));
-            });
-            bigStatus.textContent = 'Karta wypełniona ✓ Sprawdź pola, dopisz dane pacjenta ręcznie i zapisz.';
-        } catch (e) { bigStatus.textContent = 'Błąd AI: ' + e.message + ' — nagranie zostaje, przepisz ręcznie poniżej.'; }
+    $('doc-search').oninput=renderDocs;
+    $('doc-save').onclick=()=>{
+        if(!valid())return;const data={...collect(),id:crypto.randomUUID()};
+        const last=docs.at(-1);if(last && keys.every(k=>(last[k]||'')===(data[k]||'')) && JSON.stringify(last.proc)===JSON.stringify(data.proc)){msg('Ta wersja karty jest już zapisana.');return;}
+        const next=[...docs,data];if(write('maciej_docs',next)){docs=next;saveDraft();renderDocs();msg('Zapisano nową wersję karty. Przenieś zatwierdzony wpis do dokumentacji gabinetu.');toast('Karta wizyty zapisana.');}
     };
-
-    // ---------- karty wizyt ----------
-    const safeLoad = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (_) { return fb; } };
-    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const docs = safeLoad('maciej_docs', []);
-    const saveDocs = () => localStorage.setItem('maciej_docs', JSON.stringify(docs));
-    const procSel = () => [...document.querySelectorAll('#doc-proc input:checked')].map(c => c.value);
-    const fillVisitOptions = () => {
-        const sel = $('doc-visit');
-        sel.replaceChildren(new Option('— nowa / spoza listy —', ''));
-        safeLoad('maciej_visits', [])
-            .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time)).slice(0, 30)
-            .forEach((v, i) => sel.append(new Option(`${v.date} ${v.time} — ${v.client} (${v.service})`, i)));
-        sel.onchange = () => {
-            const v = JSON.parse(localStorage.getItem('maciej_visits') || '[]')
-                .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))[+sel.value];
-            if (!v) return;
-            $('doc-date').value = v.date; $('doc-patient').value = v.client;
-        };
+    $('doc-list').onclick=async event=>{
+        const load=event.target.closest('[data-doc-load]'),remove=event.target.closest('[data-doc-remove]');
+        if(load){const data=docs[+load.dataset.docLoad];const differentPlan=P.planHasContent()&&P.getPlanPatient()!==data.patient;const prompt=differentPlan?'Wczytać kartę tego pacjenta? Bieżący szkic karty i plan innego pacjenta zostaną wyczyszczone. Zapisane wersje pozostaną w historii.':'Wczytać kartę? Bieżący szkic zostanie zastąpiony. Zapisana karta pozostanie bez zmian.';if((dirty()||differentPlan)&&!await confirmChange(prompt,'Wczytaj kartę'))return;if(differentPlan)P.resetPlan();fill(data);saveDraft();$('doc-patient').focus();msg('Wczytano kartę. Zmiany zapiszesz jako nową wersję.');}
+        if(remove){if(!await confirmChange('Usunąć tę zapisaną wersję karty z lokalnej historii? Tej operacji nie można cofnąć.','Usuń wersję'))return;const next=docs.filter((d,i)=>i!==+remove.dataset.docRemove);if(write('maciej_docs',next)){docs=next;renderDocs();$('doc-search').focus();}}
     };
-    fillVisitOptions();
-    $('doc-date').valueAsDate = new Date();
-
-    const collect = () => ({
-        id: Date.now(), date: $('doc-date').value, patient: $('doc-patient').value.trim() || '—',
-        subj: $('doc-subj').value.trim(), obj: $('doc-obj').value.trim(),
-        assess: $('doc-assess').value.trim(), icf: $('doc-icf').value.trim(),
-        proc: procSel(), plan: $('doc-plan').value.trim(), sign: $('doc-sign').value.trim()
-    });
-    const docText = (d) =>
-        `KARTA WIZYTY FIZJOTERAPEUTYCZNEJ (robocza, w duchu KIOF)\nData: ${d.date}\nPacjent (kod): ${d.patient}\n\nS — wywiad: ${d.subj || '—'}\nO — badanie: ${d.obj || '—'}\nA — rozpoznanie/problem: ${d.assess || '—'}\nFunkcjonowanie (ICF): ${d.icf || '—'}\nP — wykonano: ${d.proc.join('; ') || '—'}\nZalecenia i plan: ${d.plan || '—'}\n\nPodpis: ${d.sign}`;
-    const renderDocs = () => {
-        const box = $('doc-list');
-        box.replaceChildren();
-        if (!docs.length) { box.innerHTML = '<p class="empty">Brak zapisanych kart.</p>'; return; }
-        [...docs].reverse().forEach((d) => {
-            const row = document.createElement('div');
-            row.className = 'visit-row';
-            row.innerHTML = `<div><strong>${esc(d.date)}</strong> — ${esc(d.patient)}<small>${esc(d.assess || 'bez rozpoznania').slice(0, 80)}</small></div><span class="row-btns"><button data-a="load">Otwórz</button><button data-a="del" aria-label="Usuń">×</button></span>`;
-            row.querySelector('[data-a=load]').onclick = () => {
-                $('doc-date').value = d.date; $('doc-patient').value = d.patient;
-                $('doc-subj').value = d.subj; $('doc-obj').value = d.obj;
-                $('doc-assess').value = d.assess; $('doc-icf').value = d.icf;
-                document.querySelectorAll('#doc-proc input').forEach(c => c.checked = d.proc.includes(c.value));
-                $('doc-plan').value = d.plan; $('doc-sign').value = d.sign;
-                msg('Wczytano kartę — sprawdź i zapisz jako nową wersję.');
-            };
-            row.querySelector('[data-a=del]').onclick = () => { docs.splice(docs.indexOf(d), 1); saveDocs(); renderDocs(); };
-            box.append(row);
-        });
-    };
+    const textFor=d=>`KARTA WIZYTY — Maciej Liedel\nWpis roboczy\nData: ${d.date}\nPacjent: ${d.patient}\n\nWYWIAD\n${d.subj||'—'}\n\nBADANIE\n${d.obj||'—'}\n\nPROBLEM / ROZPOZNANIE\n${d.assess||'—'}\n\nFUNKCJONOWANIE / ICF\n${d.icf||'—'}\n\nWYKONANE PROCEDURY\n${d.proc.join(', ')||'—'}\n\nZALECENIA\n${d.plan||'—'}\n\nPodpis: ${d.sign||'—'}`;
+    $('doc-preview').onclick=()=>{if(!valid())return;const d=collect();const sections=[['Wywiad',d.subj],['Badanie',d.obj],['Problem / rozpoznanie',d.assess],['Funkcjonowanie / ICF',d.icf],['Wykonane procedury',d.proc.join(', ')],['Zalecenia',d.plan],['Podpis',d.sign]];P.exportDocument({title:'Karta wizyty',filename:'karta-wizyty-'+d.date,email:d.email,text:textFor(d),html:`<div class="paper-brand">MACIEJ LIEDEL · FIZJOTERAPIA</div><h2>Karta wizyty</h2><div class="paper-meta"><p>Wpis roboczy<br><strong>Pacjent:</strong> ${esc(d.patient)}<br><strong>Data:</strong> ${esc(d.date)}</p></div>${sections.map(([label,value])=>`<h3>${label}</h3><p>${esc(value||'—')}</p>`).join('')}`});};
+    $('doc-to-plan').onclick=()=>{if(!valid())return;const d=collect();P.fromDoc({patient:d.patient,email:d.email,goal:docGoal||d.assess,notes:d.plan});};
     renderDocs();
 
-    $('doc-save').onclick = () => {
-        const d = collect();
-        if (!d.date || d.patient === '—') { msg('Uzupełnij datę i kod pacjenta.'); return; }
-        docs.push(d); saveDocs(); renderDocs(); msg('Kartę zapisano ✓ (wpis roboczy — przenieś do systemu gabinetu).');
+    // Configuration and requests are explicit; no remote SDK is loaded at startup.
+    const configKeys={provider:'provider',url:'url',key:'key',model:'model',opbase:'opbase',opuser:'opuser',oppass:'oppass'};
+    Object.keys(configKeys).forEach(key=>$('ai-'+key).value=readText('maciej_ai_'+key,key==='provider'?'openrouter':key==='opbase'?'http://127.0.0.1:4096':''));
+    const aiShow=()=>{const provider=$('ai-provider').value;$('ai-url-wrap').classList.toggle('hidden',provider!=='custom');$('ai-opencode-wrap').classList.toggle('hidden',provider!=='opencode');$('ai-key-wrap').classList.toggle('hidden',provider==='opencode');};
+    $('ai-provider').onchange=aiShow;aiShow();
+    const settings=()=>Object.fromEntries(Object.keys(configKeys).map(key=>[key,readText('maciej_ai_'+key,key==='provider'?'openrouter':key==='opbase'?'http://127.0.0.1:4096':'')]));
+    $('ai-save').onclick=()=>{const ok=Object.keys(configKeys).map(key=>write('maciej_ai_'+key,$('ai-'+key).value.trim(),true)).every(Boolean);$('ai-msg').textContent=ok?'Ustawienia zapisane w tej przeglądarce.':'Nie zapisano wszystkich ustawień.';};
+    const getJSON=async(url,options)=>{
+        const parsed=new URL(url);if(!['https:','http:'].includes(parsed.protocol))throw new Error('Niepoprawny adres serwera.');
+        const response=await fetch(url,{...options,signal:AbortSignal.timeout(60000)});if(!response.ok)throw new Error(`Połączenie zwróciło błąd ${response.status}. Sprawdź ustawienia.`);return response.json();
     };
-    $('doc-print').onclick = () => {
-        const w = window.open('', '_blank');
-        w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Karta wizyty</title><style>body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:0 20px;line-height:1.65}pre{white-space:pre-wrap;font:inherit}</style></head><body><pre>${docText(collect()).replace(/</g, '&lt;')}</pre><script>onload=()=>print()<\/script></body></html>`);
-        w.document.close();
-    };
-    const emailDoc = async () => {
-        const to = $('doc-email').value.trim();
-        if (!to || !to.includes('@')) { msg('Wpisz e-mail pacjenta.'); return; }
-        const text = docText(collect());
-        if (EMAIL_CONFIG.publicKey && typeof emailjs !== 'undefined') {
-            try {
-                emailjs.init({ publicKey: EMAIL_CONFIG.publicKey });
-                await emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, { to_email: to, patient: $('doc-patient').value, goal: 'Karta wizyty', plan_text: text });
-                msg(`Wysłano na ${to} ✓`); return;
-            } catch (_) { msg('Błąd EmailJS — otwieram program pocztowy.'); }
+    const ask=async(system,user)=>{
+        const s=settings();const headers={'Content-Type':'application/json'};
+        if(s.provider==='opencode'){
+            if(s.opuser||s.oppass)headers.Authorization='Basic '+btoa(`${s.opuser||'opencode'}:${s.oppass}`);
+            const base=s.opbase.replace(/\/$/,'');const session=await getJSON(base+'/session',{method:'POST',headers,body:JSON.stringify({title:'Notatka fizjo'})});
+            const body={system,parts:[{type:'text',text:user}]};if(s.model.includes('/')){const [providerID,...model]=s.model.split('/');body.model={providerID,modelID:model.join('/')};}
+            const result=await getJSON(base+'/session/'+encodeURIComponent(session.id)+'/message',{method:'POST',headers,body:JSON.stringify(body)});
+            const text=(result.parts||[]).filter(p=>p.type==='text').map(p=>p.text).join('\n').trim();if(!text)throw new Error('Serwer nie zwrócił tekstu.');return text;
         }
-        window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent('Karta wizyty — Maciej Liedel')}&body=${encodeURIComponent(text)}`;
+        if(!s.key||!s.model)throw new Error('Uzupełnij i zapisz klucz oraz model w ustawieniach AI.');
+        headers.Authorization='Bearer '+s.key;
+        const url=s.provider==='openai'?'https://api.openai.com/v1/chat/completions':s.provider==='custom'?s.url:'https://openrouter.ai/api/v1/chat/completions';
+        const result=await getJSON(url,{method:'POST',headers,body:JSON.stringify({model:s.model,temperature:0.3,max_tokens:2200,messages:[{role:'system',content:system},{role:'user',content:user}]})});
+        const text=result.choices?.[0]?.message?.content;if(typeof text!=='string'||!text.trim())throw new Error('Model nie zwrócił tekstu.');return text.trim();
     };
-    $('doc-email-send').onclick = emailDoc;
-
-    // ---------- akcje AI (TYLKO opis kliniczny — bez danych pacjenta) ----------
-    const SYS = 'Jesteś asystentem doświadczonego fizjoterapeuty. Otrzymujesz WYŁĄCZNIE anonimowy opis kliniczny (bez danych osobowych). Piszesz zwięźle, profesjonalnym językiem medycznym po polsku. Nie stawiasz rozpoznań lekarskich; formułujesz problemy funkcjonalne. Bez wymyślania faktów spoza notatki.';
-    const aiGuard = () => {
-        if (!$('doc-ai-consent').checked) { msg('Zaznacz potwierdzenie, że notatka nie zawiera danych pacjenta.'); return false; }
-        return true;
+    $('ai-test').onclick=async()=>{const button=$('ai-test');button.disabled=true;$('ai-msg').textContent='Sprawdzam zapisane ustawienia…';try{const s=settings();if(s.provider==='opencode'){const headers={};if(s.opuser||s.oppass)headers.Authorization='Basic '+btoa(`${s.opuser||'opencode'}:${s.oppass}`);await getJSON(s.opbase.replace(/\/$/,'')+'/global/health',{headers});}else await ask('Odpowiedz jednym słowem.','Test. Odpowiedz: OK');$('ai-msg').textContent='Połączenie działa.';}catch(error){$('ai-msg').textContent=error.message;}finally{button.disabled=false;}};
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    $('doc-dict-big').setAttribute('aria-pressed','false');
+    $('doc-dict-big').onclick=()=>{
+        if(recognition){stopRecording();saveDraft();return;}
+        if(!$('speech-consent').checked){$('doc-dict-status').textContent='Najpierw zaznacz zgodę na rozpoznawanie mowy.';$('speech-consent').focus();return;}
+        if(!SR){$('doc-dict-status').textContent='Ta przeglądarka nie udostępnia dyktowania. Wpisz lub wklej notatkę poniżej.';return;}
+        const r=new SR();recognition=r;r.lang='pl-PL';r.interimResults=true;r.continuous=true;
+        const base=$('doc-transcript').value.trim();let failed=false;
+        r.onresult=event=>{const text=Array.from(event.results,result=>result[0].transcript).join(' ');$('doc-transcript').value=[base,text].filter(Boolean).join('\n');revision++;saveDraft();};
+        r.onerror=event=>{failed=true;$('doc-dict-status').textContent=event.error==='not-allowed'?'Mikrofon jest zablokowany. Wpisz notatkę lub zmień uprawnienia przeglądarki.':'Nie udało się rozpoznać mowy. Wpisz notatkę ręcznie.';};
+        r.onend=()=>{recognition=null;$('doc-dict-big').textContent='Rozpocznij dyktowanie';$('doc-dict-big').setAttribute('aria-pressed','false');if(!failed)$('doc-dict-status').textContent='Dyktowanie zakończone. Sprawdź treść przed użyciem AI.';saveDraft();};
+        try{r.start();$('doc-dict-big').textContent='Zatrzymaj dyktowanie';$('doc-dict-big').setAttribute('aria-pressed','true');$('doc-dict-status').textContent='Słucham. Nie wymawiaj danych identyfikujących pacjenta.';}catch{stopRecording();$('doc-dict-status').textContent='Nie można rozpocząć dyktowania. Wpisz tekst ręcznie.';}
     };
-    $('doc-ai-tidy').onclick = async () => {
-        if (!aiGuard()) return;
-        msg('AI porządkuje zapis...');
-        try {
-            const out = await aiAsk(SYS + ' Uporządkuj poniższą roboczą notatkę z wizyty w strukturę S-O-A-P z nagłówkami, popraw język na profesjonalny, zachowaj wszystkie fakty. Oznacz [?] miejsca niejasne.',
-                `S: ${$('doc-subj').value}\nO: ${$('doc-obj').value}\nA: ${$('doc-assess').value}\nICF: ${$('doc-icf').value}\nP: ${procSel().join('; ')}\nPlan: ${$('doc-plan').value}`);
-            const parts = out.split(/(?=^O\s*[-–:]|^A\s*[-–:]|^P\s*[-–:])/m);
-            if (parts[0]) $('doc-subj').value = parts[0].replace(/^S\s*[-–:]/, '').trim();
-            const get = (l) => { const m = out.match(new RegExp('^' + l + '\\s*[-–:]([\\s\\S]*?)(?=^[SOAP]\\s*[-–:]|$)', 'm')); return m ? m[1].trim() : ''; };
-            const o = get('O'), a = get('A'), p = get('P');
-            if (o) $('doc-obj').value = o;
-            if (a) $('doc-assess').value = a;
-            if (p) $('doc-plan').value = p;
-            msg('Zapis uporządkowany — zweryfikuj przed zapisem ✓');
-        } catch (e) { msg('Błąd AI: ' + e.message); }
+    $('speech-consent').onchange=()=>{if(!$('speech-consent').checked)stopRecording();};
+    document.addEventListener('panel:tab',event=>{if(event.detail!=='dokumentacja')stopRecording();});
+    const clinical=()=>({subj:$('doc-subj').value,obj:$('doc-obj').value,assess:$('doc-assess').value,icf:$('doc-icf').value,proc:proc(),plan:$('doc-plan').value});
+    const system='Redagujesz notatkę fizjoterapeuty po polsku. Zachowaj fakty i niepewność. Nie diagnozuj, nie wymyślaj informacji, zaleceń ani procedur. Odpowiedź wymaga weryfikacji terapeuty.';
+    const aiButtons=['doc-dict-ai','doc-ai-tidy','doc-ai-patient'];
+    let pendingAI=null;
+    const runAI=async mode=>{
+        if(!$('doc-ai-consent').checked){msg('Sprawdź opis i zaznacz zgodę na wysłanie go do wybranego dostawcy AI.');$('doc-ai-consent').focus();return;}
+        stopRecording();
+        const input=mode==='dict'?$('doc-transcript').value.trim():JSON.stringify(clinical());
+        if((mode==='dict'&&!input)||(mode!=='dict'&&!Object.values(clinical()).some(v=>Array.isArray(v)?v.length:String(v).trim()))){toast('Najpierw wpisz notatkę do opracowania.');return;}
+        const before=revision,generation=++requestGeneration;aiButtons.forEach(id=>$(id).disabled=true);msg('AI opracowuje propozycję. Twoja karta pozostaje bez zmian.');$('doc-dict-status').textContent='Opracowuję propozycję AI…';
+        try{
+            const instruction=mode==='patient'?'Napisz krótkie streszczenie dla pacjenta prostym językiem, wyłącznie na podstawie notatki.':`Odpowiedz tylko JSON z polami tekstowymi subj, obj, assess, icf, plan oraz tablicą proc. Zachowaj wszystkie informacje. Procedury wyłącznie z listy: ${[...document.querySelectorAll('#doc-proc input')].map(i=>i.value).join(', ')}. Brak danych oznacz pustym polem.`;
+            const result=await ask(system+' '+instruction,input);
+            if(before!==revision||generation!==requestGeneration){msg('Karta zmieniła się w trakcie zapytania. Propozycja nie została zastosowana — uruchom AI ponownie dla bieżącej notatki.');return;}
+            let data;
+            if(mode==='patient')data={summary:result};else{data=JSON.parse(result.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,''));if(!data||typeof data!=='object'||!['subj','obj','assess','icf','plan'].every(key=>typeof data[key]==='string')||!Array.isArray(data.proc)||!data.proc.every(p=>typeof p==='string'))throw new Error('AI zwróciło niepoprawną strukturę. Karta nie została zmieniona.');}
+            if(mode!=='patient' && data.proc.some(p=>![...document.querySelectorAll('#doc-proc input')].some(i=>i.value===p)))throw new Error('AI zwróciło procedurę spoza dostępnej listy. Karta nie została zmieniona. Popraw notatkę lub wpisz procedury ręcznie.');
+            pendingAI={data,revision:before,generation,mode};
+            $('ai-review-text').textContent=mode==='patient'?data.summary:`WYWIAD\n${data.subj}\n\nBADANIE\n${data.obj}\n\nPROBLEM\n${data.assess}\n\nICF\n${data.icf}\n\nPROCEDURY\n${data.proc.join(', ')}\n\nZALECENIA\n${data.plan}`;
+            P.openDialog('ai-review-modal');msg('Propozycja gotowa do sprawdzenia.');
+        }catch(error){msg('Błąd AI: '+error.message);toast('Nie zmieniono karty. Sprawdź komunikat przy formularzu.');}
+        finally{aiButtons.forEach(id=>$(id).disabled=false);$('doc-dict-status').textContent='Sprawdź wynik przy karcie wizyty.';}
     };
-    $('doc-ai-patient').onclick = async () => {
-        if (!aiGuard()) return;
-        msg('AI pisze streszczenie...');
-        try {
-            const out = await aiAsk('Jesteś fizjoterapeutą. Napisz krótkie (max 8 zdań), ciepłe streszczenie wizyty dla pacjenta prostym językiem: co znaleziono, co zrobiono, co ma robić w domu. Bez żargonu, bez rozpoznań lekarskich.',
-                `Problem: ${$('doc-assess').value}\nWykonano: ${procSel().join('; ')}\nZalecenia: ${$('doc-plan').value}`);
-            $('doc-plan').value = ($('doc-plan').value ? $('doc-plan').value + '\n\n' : '') + '--- Dla pacjenta ---\n' + out;
-            msg('Streszczenie dopisane do zaleceń ✓');
-        } catch (e) { msg('Błąd AI: ' + e.message); }
+    $('doc-dict-ai').onclick=()=>runAI('dict');$('doc-ai-tidy').onclick=()=>runAI('tidy');$('doc-ai-patient').onclick=()=>runAI('patient');
+    $('ai-review-apply').onclick=()=>{
+        if(!pendingAI||pendingAI.revision!==revision||pendingAI.generation!==requestGeneration){$('ai-review-modal').close();toast('Karta zmieniła się. Uruchom AI ponownie.');return;}
+        const {data,mode}=pendingAI;
+        if(mode==='patient')$('doc-plan').value=[$('doc-plan').value.trim(),'Dla pacjenta:\n'+data.summary].filter(Boolean).join('\n\n');
+        else{['subj','obj','assess','icf','plan'].forEach(key=>$('doc-'+key).value=data[key]);document.querySelectorAll('#doc-proc input').forEach(i=>i.checked=data.proc.includes(i.value));}
+        revision++;saveDraft();$('ai-review-modal').close();pendingAI=null;msg('Zastosowano propozycję. Sprawdź kartę przed zapisaniem wersji.');
     };
-});
+})();

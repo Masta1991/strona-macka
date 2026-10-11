@@ -1,251 +1,1008 @@
 <!DOCTYPE html>
-<html lang="pl" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Panel fizjoterapeuty | Maciej Liedel</title>
-    <meta name="description" content="Wewnętrzny panel: baza ćwiczeń, generator planów treningowych i kalendarz wizyt.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="panel.css">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <span class="logo-main">MACIEJ LIEDEL</span>
-                <span class="logo-sub">PANEL FIZJOTERAPEUTY</span>
-            </div>
-            <div class="nav-controls">
-                <button id="theme-toggle" class="theme-btn" title="Przełącz tryb">
-                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                </button>
-                <a href="../index.html" class="nav-ghost">← Strona główna</a>
-            </div>
+<html data-theme="light" lang="pl">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="noindex, nofollow" name="robots"/>
+  <meta content="Gabinet Macieja Liedela — wywiad, karta wizyty i plany rehabilitacji." name="description"/>
+  <title>
+   Gabinet · Maciej Liedel
+  </title>
+  <link href="data:," rel="icon"/>
+  <link href="panel.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip-link" href="#workspace">
+   Przejdź do treści
+  </a>
+  <aside class="sidebar">
+   <a class="brand" href="#start">
+    <span aria-hidden="true" class="brand-mark">
+     ml
+     <span>
+      +
+     </span>
+    </span>
+    <span>
+     Maciej Liedel
+     <small>
+      FIZJOTERAPIA
+     </small>
+    </span>
+   </a>
+   <div class="nav-caption">
+    TWÓJ GABINET
+   </div>
+   <div aria-label="Obszary gabinetu" aria-orientation="vertical" class="panel-tabs" role="tablist">
+    <button data-tab="start" role="tab">
+     <span aria-hidden="true" class="nav-icon">
+      ⌂
+     </span>
+     Pulpit
+    </button>
+    <button data-tab="dokumentacja" role="tab">
+     <span aria-hidden="true" class="nav-icon">
+      ▤
+     </span>
+     Wywiad i wizyta
+    </button>
+    <button data-tab="baza" role="tab">
+     <span aria-hidden="true" class="nav-icon">
+      ⊞
+     </span>
+     Baza ćwiczeń
+    </button>
+    <button data-tab="generator" role="tab">
+     <span aria-hidden="true" class="nav-icon">
+      ☷
+     </span>
+     Plan rehabilitacji
+     <span class="badge" id="plan-count">
+      0
+     </span>
+    </button>
+    <button data-tab="kalendarz" role="tab">
+     <span aria-hidden="true" class="nav-icon">
+      ▦
+     </span>
+     Wizyty
+    </button>
+    <button data-tab="ai" role="tab">
+     <span aria-hidden="true" class="nav-icon">
+      ⚙
+     </span>
+     Ustawienia AI
+    </button>
+   </div>
+   <div class="sidebar-foot">
+    <span class="local-dot">
+    </span>
+    Lokalna przestrzeń pracy
+    <p>
+     Karty i plany zapisujesz w tej przeglądarce.
+    </p>
+    <a href="../index.html">
+     Otwórz stronę gabinetu ↗
+    </a>
+   </div>
+  </aside>
+  <div class="app">
+   <header class="topbar">
+    <span>
+     GABINET
+     <span class="topbar-divider">
+      /
+     </span>
+     <strong id="current-area">
+      Pulpit
+     </strong>
+    </span>
+    <button aria-label="Włącz ciemny motyw" class="icon-button" id="theme-toggle" title="Zmień motyw">
+     ◐
+    </button>
+   </header>
+   <main id="workspace" tabindex="-1">
+    <div class="notice danger hidden" id="storage-error" role="alert">
+    </div>
+    <section class="tab-panel" id="tab-start">
+     <div class="page-heading">
+      <div>
+       <p class="eyebrow" id="today-label">
+        TWOJA PRZESTRZEŃ PRACY
+       </p>
+       <h1>
+        Dzień dobry, Maćku.
+       </h1>
+       <p>
+        Od pierwszej rozmowy do planu, z którym pacjent wraca do domu.
+       </p>
+      </div>
+      <button class="btn-primary" data-new-patient="">
+       ＋ Nowa wizyta
+      </button>
+     </div>
+     <div class="stats-grid">
+      <button class="stat" data-go="kalendarz">
+       <span>
+        Wizyty dzisiaj
+       </span>
+       <strong id="stat-visits">
+        0
+       </strong>
+       <small>
+        Przejdź do terminarza
+        <span>
+         ↗
+        </span>
+       </small>
+      </button>
+      <button class="stat" data-go="dokumentacja">
+       <span>
+        Zapisane karty
+       </span>
+       <strong id="stat-docs">
+        0
+       </strong>
+       <small>
+        Otwórz dokumentację
+        <span>
+         ↗
+        </span>
+       </small>
+      </button>
+      <button class="stat" data-go="generator">
+       <span>
+        Ćwiczenia w bieżącym planie
+       </span>
+       <strong id="stat-plan">
+        0
+       </strong>
+       <small>
+        Kontynuuj przygotowanie
+        <span>
+         ↗
+        </span>
+       </small>
+      </button>
+     </div>
+     <div class="home-grid">
+      <article class="workflow-card">
+       <p class="eyebrow">
+        DOBRZE UŁOŻONA WIZYTA
+       </p>
+       <h2>
+        Więcej uwagi dla pacjenta.
+        <br/>
+        Mniej szukania w notatkach.
+       </h2>
+       <p>
+        Wszystko, czego potrzebujesz podczas wizyty, w jednym miejscu.
+       </p>
+       <div class="workflow-steps">
+        <button data-go="dokumentacja">
+         <span>
+          01
+         </span>
+         <div>
+          <strong>
+           Porozmawiaj i zapisz
+          </strong>
+          <small>
+           Wywiad, badanie i zalecenia
+          </small>
+         </div>
+         <b>
+          ↗
+         </b>
+        </button>
+        <button data-go="baza">
+         <span>
+          02
+         </span>
+         <div>
+          <strong>
+           Dobierz ćwiczenia
+          </strong>
+          <small>
+           Wyszukiwarka i instrukcje wykonania
+          </small>
+         </div>
+         <b>
+          ↗
+         </b>
+        </button>
+        <button data-go="generator">
+         <span>
+          03
+         </span>
+         <div>
+          <strong>
+           Przygotuj plan
+          </strong>
+          <small>
+           Podgląd, PDF i wiadomość dla pacjenta
+          </small>
+         </div>
+         <b>
+          ↗
+         </b>
+        </button>
+       </div>
+      </article>
+      <aside class="surface">
+       <div class="section-heading">
+        <h2>
+         Najbliższe wizyty
+        </h2>
+        <button class="btn-link" data-go="kalendarz">
+         Wszystkie ↗
+        </button>
+       </div>
+       <div id="home-visits">
+       </div>
+       <div class="quiet-note">
+        <strong>
+         Twój zapis zostaje tutaj
+        </strong>
+        <p>
+         To panel roboczy. Zapis w przeglądarce nie zastępuje kopii dokumentacji gabinetu. Gotowe karty i plany pobieraj na dysk.
+        </p>
+       </div>
+      </aside>
+     </div>
+    </section>
+    <section class="tab-panel hidden" id="tab-dokumentacja">
+     <div class="page-heading">
+      <div>
+       <p class="eyebrow">
+        01 / SPOTKANIE Z PACJENTEM
+       </p>
+       <h1>
+        Wywiad i karta wizyty
+       </h1>
+       <p>
+        Przejdź od rozmowy do zaleceń. Szkic zapisuje się automatycznie.
+       </p>
+      </div>
+      <button class="btn-secondary" data-new-patient="">
+       ＋ Nowy pacjent
+      </button>
+     </div>
+     <div class="editor-grid">
+      <div class="editor-main">
+       <article class="surface">
+        <div class="section-heading">
+         <h2>
+          <span class="step-number">
+           1
+          </span>
+          Pacjent i wywiad
+         </h2>
+         <span class="save-status" id="doc-draft-status" role="status">
+         </span>
         </div>
-    </nav>
-
-    <main class="container panel-main">
-        <p class="panel-note">Panel roboczy Macieja. Dane (plany, wizyty) zapisują się tylko w tej przeglądarce. Adresu panelu nie podawaj pacjentom — klient dostaje gotowy PDF lub wklejony plan.</p>
-        <div class="panel-tabs" role="tablist" aria-label="Panel">
-            <button class="is-on" data-tab="baza" role="tab">Baza ćwiczeń</button>
-            <button data-tab="generator" role="tab">Generator planów</button>
-            <button data-tab="kalendarz" role="tab">Kalendarz wizyt</button>
-            <button data-tab="dokumentacja" role="tab">Dokumentacja wizyty</button>
-            <button data-tab="ai" role="tab">Asystent AI</button>
+        <label>
+         Wizyta z terminarza
+         <select id="doc-visit">
+          <option value="">
+           Nowa wizyta / spoza listy
+          </option>
+         </select>
+        </label>
+        <div class="form-grid-2">
+         <label>
+          Kod / imię pacjenta
+          <input autocomplete="off" id="doc-patient" placeholder="np. AK-12"/>
+         </label>
+         <label>
+          Data wizyty
+          <input id="doc-date" required="" type="date"/>
+         </label>
         </div>
-
-        <section id="tab-baza">
-            <p class="lead">Sprawdzone ćwiczenia z opisem krok po kroku i darmowym filmem. Przycisk „+ Do planu” dopisuje ćwiczenie do generatora.</p>
-            <p class="video-note">Filmy: darmowe kanały fizjoterapeutyczne (m.in. <a href="https://www.youtube.com/@e3rehabexerciselibrary" target="_blank" rel="noopener">E3 Rehab Exercise Library</a>). Otwierają się w YouTube.</p>
-            <div class="ex-filters" id="ex-filters" role="group" aria-label="Filtr ćwiczeń">
-                <button class="is-on" data-f="all">Wszystkie</button>
-                <button data-f="Kolano">Kolano</button>
-                <button data-f="Bark">Bark</button>
-                <button data-f="Kręgosłup">Kręgosłup</button>
-                <button data-f="Żuchwa">Żuchwa</button>
-                <button data-f="Staw skokowy">Staw skokowy</button>
-            </div>
-            <div id="ex-list" class="ex-grid"></div>
-        </section>
-
-        <section id="tab-generator" class="hidden">
-            <div class="planner-grid">
-                <div class="planner-form">
-                    <label>Imię / kod klienta <input id="plan-patient" type="text" placeholder="np. Anna K." autocomplete="off"></label>
-                    <label>Cel planu <input id="plan-goal" type="text" placeholder="np. Wzmocnienie po skręceniu kostki" autocomplete="off"></label>
-                    <div id="plan-items" class="plan-items"><p class="empty">Brak ćwiczeń — dodaj je z zakładki „Baza ćwiczeń”.</p></div>
-                    <label>Zalecenia dodatkowe <textarea id="plan-notes" rows="3" placeholder="np. Ból akceptowalny do 3/10; kontrola za 2 tygodnie."></textarea></label>
-                    <div class="planner-actions">
-                        <button id="plan-print" class="btn-primary">Drukuj / zapisz PDF</button>
-                        <button id="plan-copy" class="btn-secondary">Kopiuj plan do wysyłki</button>
-                        <button id="plan-clear" class="btn-link">Wyczyść</button>
-                    </div>
-                    <div class="email-row">
-                        <label>E-mail klienta <input id="plan-email" type="email" placeholder="klient@przyklad.pl" autocomplete="off"></label>
-                        <button id="plan-email-send" class="btn-primary">Wyślij plan na e-mail</button>
-                    </div>
-                    <p id="plan-msg" class="plan-msg" role="status"></p>
-                    <details class="email-setup"><summary>Jak włączyć wysyłkę jednym klikiem?</summary>
-                        <p>Bez konfiguracji przycisk otwiera program pocztowy (mailto) z gotową treścią. Aby wysyłać bezpośrednio z panelu, załóż darmowe konto <a href="https://www.emailjs.com" target="_blank" rel="noopener">EmailJS</a>, podepnij swoją skrzynkę i wpisz 3 klucze w pliku <code>panel/panel.js</code> (EMAIL_CONFIG na górze).</p>
-                    </details>
-                </div>
-                <aside class="planner-side">
-                    <h3>Jak wysłać plan?</h3>
-                    <ol>
-                        <li><strong>Drukuj / zapisz PDF</strong> — w oknie drukowania wybierz „Zapisz jako PDF”.</li>
-                        <li>Albo <strong>Kopiuj plan</strong> i wklej do SMS-a, maila lub wiadomości Booksy.</li>
-                        <li>Do ćwiczeń dołączone są linki do filmów — klient ćwiczy bez zgadywania.</li>
-                    </ol>
-                </aside>
-            </div>
-        </section>
-
-        <section id="tab-kalendarz" class="hidden">
-            <div class="cal-grid">
-                <div>
-                    <h2>Najbliższe wizyty</h2>
-                    <p class="lead">Twoja podręczna lista wizyt (zapis w przeglądarce). Pełne rezerwacje i płatności prowadzi Booksy.</p>
-                    <form id="visit-form" class="visit-form">
-                        <label>Data <input id="v-date" type="date" required></label>
-                        <label>Godzina <input id="v-time" type="time" required></label>
-                        <label>Klient <input id="v-client" type="text" placeholder="Imię / kod" required autocomplete="off"></label>
-                        <label>Usługa
-                            <select id="v-service">
-                                <option>Konsultacja fizjoterapeutyczna</option>
-                                <option>Terapia manualna / chiropraktyka</option>
-                                <option>Fizjoterapia stomatologiczna</option>
-                                <option>Fizjoterapia sportowa</option>
-                                <option>Rehabilitacja pooperacyjna</option>
-                                <option>Suche igłowanie</option>
-                            </select>
-                        </label>
-                        <label>Gabinet
-                            <select id="v-place"><option>Warszawa, Sewerynów 6</option><option>Radzymin, Słowackiego 2</option></select>
-                        </label>
-                        <button class="btn-primary" type="submit">Dodaj wizytę</button>
-                    </form>
-                    <div id="visit-list" class="visit-list"></div>
-                    <button id="visit-export" class="btn-secondary">Pobierz kalendarz (.ics)</button>
-                </div>
-                <aside class="planner-side">
-                    <h3>Połączenie z Booksy</h3>
-                    <p>Booksy nie udostępnia małym gabinetom automatycznego API do zaciągania rezerwacji na własną stronę. Dlatego kalendarz działa tak:</p>
-                    <ol>
-                        <li><strong>Rezerwacje klientów</strong> — przez <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" rel="noopener">Twój profil Booksy</a> (tam są płatności i przypomnienia).</li>
-                        <li><strong>Ta lista</strong> — szybkie notatki na dziś/jutro; wpis dodajesz w 10 sekund.</li>
-                        <li><strong>Pełna synchronizacja</strong> — możliwa, gdy Booksy włączy dla Ciebie eksport kalendarza (iCal) lub integrację z Kalendarzem Google; wtedy podepniemy go tutaj jednym linkiem. Daj znać, jeśli masz taki link — dopiszę auto-import.</li>
-                    </ol>
-                </aside>
-            </div>
-        </section>
-
-        <section id="tab-dokumentacja" class="hidden">
-            <p class="lead">Karta wizyty w duchu Karty Indywidualnej Opieki Fizjoterapeutycznej (rozp. MZ z 6.04.2020): wpis niezwłocznie po wizycie, z podpisem. Pełną dokumentację gabinetu prowadź w systemie — tu przygotowujesz treść roboczą i wydruk dla pacjenta.</p>
-            <p class="panel-note">Prywatność: do modelu AI trafia <strong>wyłącznie opis kliniczny</strong> (dolegliwości, badanie, procedury). Dane pacjenta — kod, e-mail, telefon, PESEL — wpisujesz <strong>ręcznie poniżej i nigdy nie trafiają do AI</strong>. Dyktowanie działa lokalnie w przeglądarce.</p>
-            <div class="dict-hero">
-                <div>
-                    <h3>🎙 Podyktuj wizytę — AI wypełni kartę</h3>
-                    <p>Opowiedz swobodnie przebieg wizyty: dolegliwości, badanie, co wykonano, zalecenia. <strong>Nie wymawiaj nazwiska, PESEL-u, telefonu ani e-maila</strong> — te dane dopiszesz ręcznie poniżej. Potem AI rozłoży nagranie na pola karty i zaznaczy procedury.</p>
-                </div>
-                <button id="doc-dict-big" class="dict-big" type="button">🎙 Rozpocznij dyktowanie</button>
-                <p id="doc-dict-status" class="plan-msg" role="status"></p>
-                <div id="doc-transcript" class="transcript hidden" aria-live="polite"></div>
-                <div class="planner-actions">
-                    <button id="doc-dict-ai" class="btn-primary hidden" type="button">Przetwórz przez AI i wypełnij kartę</button>
-                    <button id="doc-dict-clear" class="btn-link hidden" type="button">Wyczyść nagranie</button>
-                </div>
-            </div>
-            <h3 class="manual-head">Wpis ręczny — pola karty i dane wrażliwe (bez AI)</h3>
-            <div class="doc-grid">
-                <div class="planner-form">
-                    <label>Wizyta z kalendarza <select id="doc-visit"><option value="">— nowa / spoza listy —</option></select></label>
-                    <div class="form-grid-2">
-                        <label>Data <input id="doc-date" type="date"></label>
-                        <label>Kod pacjenta <input id="doc-patient" type="text" placeholder="np. AK-12" autocomplete="off"></label>
-                    </div>
-                    <label>Wywiad i dolegliwości (S) <span class="dict-wrap"><textarea id="doc-subj" rows="4" placeholder="Dykuj lub wpisz: dolegliwości, VAS, od kiedy, co nasila..."></textarea><button class="dict-btn" data-target="doc-subj" type="button">🎙 Dyktuj</button></span></label>
-                    <label>Badanie przedmiotowe (O) <span class="dict-wrap"><textarea id="doc-obj" rows="4" placeholder="Dykuj lub wpisz: ROM, palpacja, testy, obserwacja..."></textarea><button class="dict-btn" data-target="doc-obj" type="button">🎙 Dyktuj</button></span></label>
-                    <div class="form-grid-2">
-                        <label>Rozpoznanie / problem (A) <input id="doc-assess" type="text" placeholder="np. M54.5; przeciążenie odc. L"></label>
-                        <label>Funkcjonowanie (ICF, skrót) <input id="doc-icf" type="text" placeholder="np. b280, d450 — ból L, chód z utykiem"></label>
-                    </div>
-                    <fieldset class="pain-types" id="doc-proc"><legend>Wykonane procedury (P)</legend>
-                        <label><input type="checkbox" value="Terapia manualna"> Terapia manualna</label>
-                        <label><input type="checkbox" value="Masaż tkanek głębokich"> Masaż tkanek głębokich</label>
-                        <label><input type="checkbox" value="Suche igłowanie"> Suche igłowanie</label>
-                        <label><input type="checkbox" value="Kinesiotaping"> Kinesiotaping</label>
-                        <label><input type="checkbox" value="Ćwiczenia nadzorowane"> Ćwiczenia nadzorowane</label>
-                        <label><input type="checkbox" value="Edukacja pacjenta"> Edukacja pacjenta</label>
-                    </fieldset>
-                    <label>Zalecenia i plan <textarea id="doc-plan" rows="3" placeholder="Plan domowy, kontrola, badania..."></textarea></label>
-                    <div class="form-grid-2">
-                        <label>Podpis <input id="doc-sign" type="text" value="Maciej Liedel, mgr fizjoterapii"></label>
-                        <label>E-mail pacjenta (do wysyłki) <input id="doc-email" type="email" placeholder="pacjent@przyklad.pl" autocomplete="off"></label>
-                    </div>
-                    <label class="consent"><input type="checkbox" id="doc-ai-consent"> Potwierdzam: notatka powyżej to <strong>wyłącznie opis kliniczny</strong> — bez nazwiska, PESEL-u, telefonu i e-maila pacjenta. Dane pacjenta wpisuję ręcznie w polach poniżej.</label>
-                    <div class="planner-actions">
-                        <button id="doc-ai-tidy" class="btn-secondary" type="button">AI: uporządkuj zapis</button>
-                        <button id="doc-ai-patient" class="btn-secondary" type="button">AI: streszczenie dla pacjenta</button>
-                    </div>
-                    <div class="planner-actions">
-                        <button id="doc-save" class="btn-primary" type="button">Zapisz kartę</button>
-                        <button id="doc-print" class="btn-secondary" type="button">Drukuj / PDF</button>
-                        <button id="doc-email-send" class="btn-secondary" type="button">Wyślij mailem</button>
-                    </div>
-                    <p id="doc-msg" class="plan-msg" role="status"></p>
-                    <h3>Zapisane karty</h3>
-                    <div id="doc-list" class="visit-list"></div>
-                </div>
-                <aside class="planner-side">
-                    <h3>Co musi mieć wpis (KIOF)</h3>
-                    <ol>
-                        <li>Datę, oznaczenie pacjenta, rozpoznanie problemu zdrowotnego.</li>
-                        <li>Opis stanu zdrowia i funkcjonowania (z ICF).</li>
-                        <li>Opis postępowania: co wykonano i z jakim efektem.</li>
-                        <li>Zalecenia + podpis i oznaczenie zawodowe.</li>
-                        <li>Wpis niezwłocznie po wizycie; poprawki bez kasowania oryginału.</li>
-                    </ol>
-                    <p class="video-note">Podstawa: rozp. MZ z 6.04.2020 (Dz.U. 2020 poz. 666) i wytyczne KIF. To panel roboczy — nie zastępuje systemu dokumentacji gabinetu.</p>
-                </aside>
-            </div>
-        </section>
-
-        <section id="tab-ai" class="hidden">
-            <p class="lead">Podłącz model AI (OpenRouter, OpenAI lub zgodny z OpenAI — działa też z kluczami z OpenCode). Klucz zostaje w tej przeglądarce.</p>
-            <div class="planner-grid">
-                <div class="planner-form">
-                    <label>Dostawca
-                        <select id="ai-provider">
-                            <option value="openrouter">OpenRouter (polecany — wiele modeli, 1 klucz)</option>
-                            <option value="openai">OpenAI</option>
-                            <option value="opencode">OpenCode — lokalny serwer (bez klucza)</option>
-                            <option value="custom">Inny, zgodny z OpenAI (URL poniżej)</option>
-                        </select>
-                    </label>
-                    <label class="hidden" id="ai-url-wrap">Adres endpointu <input id="ai-url" type="text" placeholder="https://twoj-host/v1/chat/completions"></label>
-                    <div class="hidden" id="ai-opencode-wrap">
-                        <label>Adres serwera OpenCode <input id="ai-opbase" type="text" placeholder="http://127.0.0.1:4096"></label>
-                        <div class="form-grid-2">
-                            <label>Login (jeśli ustawiony) <input id="ai-opuser" type="text" placeholder="opencode" autocomplete="off"></label>
-                            <label>Hasło serwera <input id="ai-oppass" type="password" placeholder="OPENCODE_SERVER_PASSWORD" autocomplete="off"></label>
-                        </div>
-                    </div>
-                    <label>Klucz API <input id="ai-key" type="password" placeholder="sk-... (OpenCode nie wymaga)" autocomplete="off"></label>
-                    <label>Model <input id="ai-model" type="text" placeholder="np. openai/gpt-4o-mini"></label>
-                    <div class="planner-actions">
-                        <button id="ai-save" class="btn-primary" type="button">Zapisz ustawienia</button>
-                        <button id="ai-test" class="btn-secondary" type="button">Test połączenia</button>
-                    </div>
-                    <p id="ai-msg" class="plan-msg" role="status"></p>
-                </div>
-                <aside class="planner-side">
-                    <h3>Jak to działa</h3>
-                    <ol>
-                        <li>Klucz z <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a> (doładuj kilka $ kredytu) albo z platformy OpenAI.</li>
-                        <li>Albo lokalnie: uruchom w terminalu <code>opencode serve --cors http://localhost:8000</code> (adres dopasuj do tego, spod którego otwierasz panel; port zobaczysz po starcie, domyślnie 4096), wybierz dostawcę OpenCode i wpisz model jako <code>provider/model</code>, np. <code>openai/gpt-4o-mini</code>. Puste pole modelu = model domyślny serwera.</li>
-                        <li>Model, np. <code>openai/gpt-4o-mini</code> — tani i wystarczający do redakcji notatek.</li>
-                        <li>Przyciski AI w zakładce Dokumentacja wysyłają tylko treść roboczej notatki.</li>
-                        <li>Dyktowanie (🎙) to wbudowana funkcja przeglądarki (Chrome/Edge, język polski) — bez klucza.</li>
-                    </ol>
-                    <p class="video-note">Uwaga RODO: treść trafia do zewnętrznego modelu. Stosuj kody pacjentów i miej zgodę pacjenta na taką formę opracowania notatki.</p>
-                </aside>
-            </div>
-        </section>
-    </main>
-
-    <dialog id="video-modal" class="video-modal">
-        <button id="video-close" aria-label="Zamknij film">×</button>
-        <div class="video-wrap"><iframe id="video-frame" title="Instruktaż ćwiczenia" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-        <p><a id="video-link" href="#" target="_blank" rel="noopener">Otwórz w YouTube ↗</a></p>
-    </dialog>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script src="../exercises.js"></script>
-    <script src="panel.js"></script>
-    <script src="docs.js"></script>
-</body>
+        <label>
+         Wywiad i dolegliwości
+         <span class="field-hint">
+          Co sprowadza pacjenta? Od kiedy występuje problem i co go nasila?
+         </span>
+         <textarea id="doc-subj" placeholder="Zapisz historię dolegliwości i najważniejsze informacje z rozmowy…" rows="4"></textarea>
+        </label>
+        <details class="interview-guide">
+         <summary>
+          Pomocnik wywiadu — uporządkuj rozmowę
+         </summary>
+         <div class="form-grid-2">
+          <label>
+           Obszar i czas trwania
+           <input id="intake-area" placeholder="Gdzie? Od kiedy?"/>
+          </label>
+          <label>
+           Ból według pacjenta (0–10)
+           <input id="intake-pain" max="10" min="0" placeholder="Nie oceniono" type="number"/>
+          </label>
+         </div>
+         <label>
+          Co nasila, a co pomaga?
+          <textarea id="intake-factors" rows="2"></textarea>
+         </label>
+         <label>
+          Historia, leczenie i istotne informacje
+          <textarea id="intake-history" placeholder="Wcześniejsze urazy, zabiegi, leki, wyniki badań…" rows="2"></textarea>
+         </label>
+         <label>
+          Cel pacjenta
+          <input id="intake-goal" placeholder="Do jakiej aktywności chce wrócić?"/>
+         </label>
+         <button class="btn-secondary" id="intake-apply">
+          Dodaj odpowiedzi do wywiadu
+         </button>
+         <p class="field-hint">
+          Pomocnik nie ocenia objawów ani nie stawia diagnozy.
+         </p>
+        </details>
+       </article>
+       <article class="surface">
+        <div class="section-heading">
+         <h2>
+          <span class="step-number">
+           2
+          </span>
+          Badanie i postępowanie
+         </h2>
+        </div>
+        <label>
+         Badanie przedmiotowe
+         <textarea id="doc-obj" placeholder="Obserwacja, zakres ruchu, testy i wyniki…" rows="3"></textarea>
+        </label>
+        <div class="form-grid-2">
+         <label>
+          Problem / rozpoznanie
+          <input id="doc-assess" placeholder="Twoja ocena kliniczna"/>
+         </label>
+         <label>
+          Funkcjonowanie / ICF
+          <span class="optional">
+           opcjonalnie
+          </span>
+          <input id="doc-icf" placeholder="Opis lub kody ICF"/>
+         </label>
+        </div>
+        <fieldset id="doc-proc">
+         <legend>
+          Wykonane procedury
+         </legend>
+         <div class="checkbox-grid">
+          <label>
+           <input type="checkbox" value="Terapia manualna"/>
+           Terapia manualna
+          </label>
+          <label>
+           <input type="checkbox" value="Masaż tkanek głębokich"/>
+           Masaż tkanek głębokich
+          </label>
+          <label>
+           <input type="checkbox" value="Suche igłowanie"/>
+           Suche igłowanie
+          </label>
+          <label>
+           <input type="checkbox" value="Kinesiotaping"/>
+           Kinesiotaping
+          </label>
+          <label>
+           <input type="checkbox" value="Ćwiczenia nadzorowane"/>
+           Ćwiczenia nadzorowane
+          </label>
+          <label>
+           <input type="checkbox" value="Edukacja pacjenta"/>
+           Edukacja pacjenta
+          </label>
+         </div>
+        </fieldset>
+       </article>
+       <article class="surface">
+        <div class="section-heading">
+         <h2>
+          <span class="step-number">
+           3
+          </span>
+          Zalecenia i dalszy plan
+         </h2>
+        </div>
+        <label>
+         Zalecenia dla pacjenta
+         <textarea id="doc-plan" placeholder="Postępowanie w domu, termin kontroli, dalsze kroki…" rows="4"></textarea>
+        </label>
+        <div class="form-grid-2">
+         <label>
+          Podpis
+          <input id="doc-sign" value="Maciej Liedel, mgr fizjoterapii"/>
+         </label>
+         <label>
+          E-mail pacjenta
+          <span class="optional">
+           do wiadomości
+          </span>
+          <input autocomplete="off" id="doc-email" placeholder="pacjent@przyklad.pl" type="email"/>
+         </label>
+        </div>
+        <div class="action-bar">
+         <button class="btn-primary" id="doc-save">
+          Zapisz kartę wizyty
+         </button>
+         <button class="btn-secondary" id="doc-preview">
+          Podgląd i eksport
+         </button>
+         <button class="btn-link" id="doc-to-plan">
+          Przejdź do planu →
+         </button>
+        </div>
+        <p class="feedback" id="doc-msg" role="status">
+        </p>
+       </article>
+       <article class="surface">
+        <div class="section-heading">
+         <h2>
+          Zapisane karty
+         </h2>
+        </div>
+        <label class="search-field">
+         Szukaj karty
+         <input id="doc-search" placeholder="Kod pacjenta, data lub problem…" type="search"/>
+        </label>
+        <div class="record-list" id="doc-list">
+        </div>
+       </article>
+      </div>
+      <aside class="editor-aside">
+       <div class="surface">
+        <p class="eyebrow">
+         W TRAKCIE WIZYTY
+        </p>
+        <h3>
+         Rozmowa ma swój rytm.
+        </h3>
+        <p>
+         Najpierw zapisz słowa pacjenta, potem wyniki badania i swoją ocenę. Na końcu ustalcie jasny plan działania.
+        </p>
+        <hr/>
+        <p class="field-hint">
+         Karta jest wpisem roboczym. Przenieś zatwierdzony zapis do dokumentacji gabinetu.
+        </p>
+       </div>
+       <details class="surface ai-tools">
+        <summary>
+         Dyktowanie i pomoc AI
+         <span class="optional">
+          opcjonalnie
+         </span>
+        </summary>
+        <p>
+         Rozpoznawanie mowy może korzystać z serwera dostawcy przeglądarki. Nie dyktuj danych identyfikujących pacjenta.
+        </p>
+        <label class="check-label">
+         <input id="speech-consent" type="checkbox"/>
+         Zgadzam się na użycie rozpoznawania mowy w przeglądarce.
+        </label>
+        <button class="btn-secondary" id="doc-dict-big">
+         Rozpocznij dyktowanie
+        </button>
+        <p class="feedback" id="doc-dict-status" role="status">
+        </p>
+        <label>
+         Tekst do opracowania
+         <textarea id="doc-transcript" placeholder="Możesz też wkleić anonimową notatkę…" rows="5"></textarea>
+        </label>
+        <label class="check-label">
+         <input id="doc-ai-consent" type="checkbox"/>
+         Sprawdziłem treść: bez danych identyfikujących pacjenta. Zgadzam się wysłać opis do wybranego dostawcy AI.
+        </label>
+        <div class="stack-actions">
+         <button class="btn-secondary" id="doc-dict-ai">
+          Wypełnij kartę z notatki
+         </button>
+         <button class="btn-secondary" id="doc-ai-tidy">
+          Uporządkuj zapis z AI
+         </button>
+         <button class="btn-secondary" id="doc-ai-patient">
+          Streszczenie dla pacjenta
+         </button>
+         <button class="btn-link" data-go="ai">
+          Ustawienia połączenia →
+         </button>
+        </div>
+        <p class="field-hint">
+         Odpowiedź AI zobaczysz przed zastosowaniem do karty.
+        </p>
+       </details>
+      </aside>
+     </div>
+    </section>
+    <section class="tab-panel hidden" id="tab-baza">
+     <div class="page-heading">
+      <div>
+       <p class="eyebrow">
+        02 / DOBÓR ĆWICZEŃ
+       </p>
+       <h1>
+        Biblioteka ruchu
+       </h1>
+       <p>
+        Znajdź ćwiczenie i dopasuj je do potrzeb pacjenta.
+       </p>
+      </div>
+      <button class="btn-primary" data-go="generator">
+       Otwórz plan
+       <span class="button-count" id="library-plan-count">
+        0
+       </span>
+       →
+      </button>
+     </div>
+     <div class="library-toolbar surface">
+      <label class="search-field">
+       Szukaj ćwiczenia
+       <input id="ex-search" placeholder="Nazwa, obszar ciała lub cel ćwiczenia…" type="search"/>
+      </label>
+      <div aria-label="Obszar ciała" class="filter-list" id="ex-filters" role="group">
+       <button aria-pressed="true" class="is-on" data-f="all">
+        Wszystkie
+       </button>
+       <button aria-pressed="false" data-f="Kolano">
+        Kolano
+       </button>
+       <button aria-pressed="false" data-f="Bark">
+        Bark
+       </button>
+       <button aria-pressed="false" data-f="Kręgosłup">
+        Kręgosłup
+       </button>
+       <button aria-pressed="false" data-f="Żuchwa">
+        Żuchwa
+       </button>
+       <button aria-pressed="false" data-f="Staw skokowy">
+        Staw skokowy
+       </button>
+      </div>
+     </div>
+     <div class="results-heading">
+      <span id="ex-count" role="status">
+      </span>
+      <span id="library-patient">
+       Bieżący plan: pacjent nie został jeszcze wskazany
+      </span>
+     </div>
+     <div class="ex-grid" id="ex-list">
+     </div>
+     <p class="field-hint">
+      Filmy otwierają się w odtwarzaczu YouTube dopiero po wybraniu „Obejrzyj film”.
+     </p>
+    </section>
+    <section class="tab-panel hidden" id="tab-generator">
+     <div class="page-heading">
+      <div>
+       <p class="eyebrow">
+        03 / PLAN DLA PACJENTA
+       </p>
+       <h1>
+        Plan rehabilitacji
+       </h1>
+       <p>
+        Jasne instrukcje, indywidualne dawkowanie i materiały do domu.
+       </p>
+      </div>
+      <button class="btn-secondary" data-go="baza">
+       ＋ Dodaj ćwiczenia
+      </button>
+     </div>
+     <div class="editor-grid">
+      <div class="editor-main">
+       <article class="surface">
+        <div class="section-heading">
+         <h2>
+          Założenia planu
+         </h2>
+         <span class="save-status" id="plan-save-status" role="status">
+         </span>
+        </div>
+        <div class="form-grid-2">
+         <label>
+          Pacjent / kod
+          <input autocomplete="off" id="plan-patient" placeholder="np. AK-12"/>
+         </label>
+         <label>
+          Data planu
+          <input id="plan-date" type="date"/>
+         </label>
+        </div>
+        <label>
+         Cel rehabilitacji
+         <input id="plan-goal" placeholder="Co wspólnie chcecie osiągnąć?"/>
+        </label>
+        <div class="form-grid-2">
+         <label>
+          Częstotliwość / harmonogram
+          <input id="plan-frequency" placeholder="Ustal indywidualnie"/>
+         </label>
+         <label>
+          Kontrola / okres planu
+          <input id="plan-review" placeholder="Termin lub warunek kontroli"/>
+         </label>
+        </div>
+       </article>
+       <article class="surface">
+        <div class="section-heading">
+         <h2>
+          Ćwiczenia w planie
+         </h2>
+         <button class="btn-link" data-go="baza">
+          Dodaj kolejne ＋
+         </button>
+        </div>
+        <p class="field-hint">
+         Dawkowanie z biblioteki jest punktem wyjścia. Sprawdź je i dostosuj przed przekazaniem planu.
+        </p>
+        <div class="plan-items" id="plan-items">
+        </div>
+       </article>
+       <article class="surface">
+        <label>
+         Zalecenia dodatkowe
+         <textarea id="plan-notes" placeholder="Twoje wskazówki dotyczące wykonania, postępowania i kontaktu…" rows="4"></textarea>
+        </label>
+        <div class="action-bar">
+         <button class="btn-primary" id="plan-save">
+          Zapisz wersję planu
+         </button>
+         <button class="btn-secondary" id="plan-preview">
+          Podgląd dla pacjenta
+         </button>
+         <button class="btn-link" id="plan-clear">
+          Nowy, pusty plan
+         </button>
+        </div>
+        <p class="feedback" id="plan-msg" role="status">
+        </p>
+       </article>
+       <article class="surface">
+        <h2>
+         Zapisane plany
+        </h2>
+        <div class="record-list" id="plan-history">
+        </div>
+       </article>
+      </div>
+      <aside class="editor-aside">
+       <article class="surface delivery-card">
+        <p class="eyebrow">
+         GOTOWE DO PRZEKAZANIA
+        </p>
+        <h2>
+         Plan, który zostaje
+         <br/>
+         z pacjentem.
+        </h2>
+        <p>
+         Sprawdź podgląd, a następnie wybierz wygodną formę przekazania.
+        </p>
+        <div class="stack-actions">
+         <button class="btn-primary" id="plan-print">
+          Drukuj / zapisz PDF
+         </button>
+         <button class="btn-secondary" id="plan-copy">
+          Kopiuj treść planu
+         </button>
+        </div>
+        <hr/>
+        <label>
+         E-mail pacjenta
+         <input autocomplete="off" id="plan-email" placeholder="pacjent@przyklad.pl" type="email"/>
+        </label>
+        <button class="btn-secondary full-width" id="plan-email-send">
+         Przygotuj e-mail
+        </button>
+        <p class="field-hint">
+         Pobierzesz wiadomość .eml z pełnym planem. Otwórz ją w obsługującym ten format programie pocztowym albo skopiuj treść do swojej poczty. Wysłanie zatwierdzasz sam.
+        </p>
+       </article>
+      </aside>
+     </div>
+    </section>
+    <section class="tab-panel hidden" id="tab-kalendarz">
+     <div class="page-heading">
+      <div>
+       <p class="eyebrow">
+        ORGANIZACJA DNIA
+       </p>
+       <h1>
+        Wizyty
+       </h1>
+       <p>
+        Podręczny terminarz. Rezerwacje w Booksy pozostają osobno.
+       </p>
+      </div>
+      <button class="btn-secondary" id="visit-export">
+       Pobierz kalendarz .ics
+      </button>
+     </div>
+     <div class="editor-grid">
+      <article class="surface">
+       <div class="section-heading">
+        <h2>
+         Zaplanowane spotkania
+        </h2>
+       </div>
+       <div class="record-list" id="visit-list">
+       </div>
+       <details>
+        <summary>
+         Wizyty archiwalne
+        </summary>
+        <div class="record-list" id="visit-past">
+        </div>
+       </details>
+       <p class="feedback" id="visit-msg" role="status">
+       </p>
+      </article>
+      <aside class="surface">
+       <h2>
+        Dodaj wizytę
+       </h2>
+       <form id="visit-form">
+        <div class="form-grid-2">
+         <label>
+          Data
+          <input id="v-date" required="" type="date"/>
+         </label>
+         <label>
+          Godzina
+          <input id="v-time" required="" type="time"/>
+         </label>
+        </div>
+        <label>
+         Pacjent / kod
+         <input autocomplete="off" id="v-client" placeholder="np. AK-12" required=""/>
+        </label>
+        <label>
+         Usługa
+         <select id="v-service">
+          <option>
+           Konsultacja fizjoterapeutyczna
+          </option>
+          <option>
+           Terapia manualna / chiropraktyka
+          </option>
+          <option>
+           Fizjoterapia stomatologiczna
+          </option>
+          <option>
+           Fizjoterapia sportowa
+          </option>
+          <option>
+           Rehabilitacja pooperacyjna
+          </option>
+          <option>
+           Suche igłowanie
+          </option>
+         </select>
+        </label>
+        <label>
+         Gabinet
+         <select id="v-place">
+          <option>
+           Warszawa, Sewerynów 6
+          </option>
+          <option>
+           Radzymin, Słowackiego 2
+          </option>
+         </select>
+        </label>
+        <button class="btn-primary full-width" type="submit">
+         ＋ Dodaj wizytę
+        </button>
+       </form>
+       <p class="field-hint">
+        Lista nie synchronizuje się z Booksy.
+        <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" rel="noopener noreferrer" target="_blank">
+         Otwórz rezerwacje ↗
+        </a>
+       </p>
+      </aside>
+     </div>
+    </section>
+    <section class="tab-panel hidden" id="tab-ai">
+     <div class="page-heading">
+      <div>
+       <p class="eyebrow">
+        DODATKOWE NARZĘDZIA
+       </p>
+       <h1>
+        Ustawienia asystenta AI
+       </h1>
+       <p>
+        Opcjonalna pomoc w redakcji. Wywiad, karty i plany działają bez AI.
+       </p>
+      </div>
+     </div>
+     <div class="editor-grid">
+      <article class="surface">
+       <label>
+        Dostawca
+        <select id="ai-provider">
+         <option value="openrouter">
+          OpenRouter
+         </option>
+         <option value="openai">
+          OpenAI
+         </option>
+         <option value="opencode">
+          OpenCode — serwer lokalny
+         </option>
+         <option value="custom">
+          Własny endpoint zgodny z OpenAI
+         </option>
+        </select>
+       </label>
+       <label class="hidden" id="ai-url-wrap">
+        Adres endpointu
+        <input id="ai-url" placeholder="https://twoj-host/v1/chat/completions" type="url"/>
+       </label>
+       <div class="hidden" id="ai-opencode-wrap">
+        <label>
+         Adres serwera OpenCode
+         <input id="ai-opbase" placeholder="http://127.0.0.1:4096" type="url"/>
+        </label>
+        <div class="form-grid-2">
+         <label>
+          Login
+          <input autocomplete="off" id="ai-opuser"/>
+         </label>
+         <label>
+          Hasło serwera
+          <input autocomplete="off" id="ai-oppass" type="password"/>
+         </label>
+        </div>
+       </div>
+       <label id="ai-key-wrap">
+        Klucz API
+        <input autocomplete="off" id="ai-key" placeholder="Klucz dostawcy" type="password"/>
+       </label>
+       <label>
+        Model
+        <input id="ai-model" placeholder="Identyfikator modelu u dostawcy"/>
+       </label>
+       <p class="field-hint">
+        Ustawienia, w tym klucz, są przechowywane w tej przeglądarce. Korzystaj z własnego urządzenia.
+       </p>
+       <div class="action-bar">
+        <button class="btn-primary" id="ai-save">
+         Zapisz ustawienia
+        </button>
+        <button class="btn-secondary" id="ai-test">
+         Test połączenia
+        </button>
+       </div>
+       <p class="feedback" id="ai-msg" role="status">
+       </p>
+      </article>
+      <aside class="surface">
+       <h2>
+        Ty decydujesz o wysyłce
+       </h2>
+       <p>
+        AI otrzymuje pola opisu klinicznego dopiero po Twojej zgodzie i użyciu przycisku. Pola kodu pacjenta i e-maila są pomijane, ale dane wpisane do treści notatki nie są automatycznie usuwane.
+       </p>
+       <p>
+        Sprawdź opis przed wysyłką i odpowiedź przed użyciem. Test połączenia może zużyć środki u dostawcy.
+       </p>
+       <p class="field-hint">
+        Lokalny serwer OpenCode może korzystać z zewnętrznego modelu — zależy to od jego konfiguracji.
+       </p>
+      </aside>
+     </div>
+    </section>
+    <footer class="app-footer">
+     Maciej Liedel
+     <span>
+      Przestrzeń pracy fizjoterapeuty
+     </span>
+    </footer>
+   </main>
+  </div>
+  <div class="toast hidden" id="toast" role="status">
+  </div>
+  <dialog aria-labelledby="video-title" class="video-modal" id="video-modal">
+   <div class="dialog-heading">
+    <h2 id="video-title">
+     Instruktaż ćwiczenia
+    </h2>
+    <button aria-label="Zamknij film" class="icon-button" data-close="video-modal">
+     ×
+    </button>
+   </div>
+   <div class="video-wrap">
+    <iframe allow="fullscreen; picture-in-picture" allowfullscreen="" id="video-frame" title="Instruktaż ćwiczenia">
+    </iframe>
+   </div>
+   <p>
+    <a id="video-link" rel="noopener noreferrer" target="_blank">
+     Otwórz w YouTube ↗
+    </a>
+   </p>
+  </dialog>
+  <dialog aria-labelledby="export-title" class="export-modal" id="export-modal">
+   <div class="dialog-heading">
+    <div>
+     <p class="eyebrow">
+      PODGLĄD DOKUMENTU
+     </p>
+     <h2 id="export-title">
+      Plan dla pacjenta
+     </h2>
+    </div>
+    <button aria-label="Zamknij podgląd" class="icon-button" data-close="export-modal">
+     ×
+    </button>
+   </div>
+   <div class="document-paper" id="export-body">
+   </div>
+   <div class="dialog-actions">
+    <button class="btn-primary" id="export-print">
+     Drukuj / PDF
+    </button>
+    <button class="btn-secondary" id="export-copy">
+     Kopiuj treść
+    </button>
+    <button class="btn-secondary" id="export-text">
+     Pobierz .txt
+    </button>
+    <button class="btn-secondary" id="export-email">
+     Pobierz e-mail .eml
+    </button>
+   </div>
+   <p class="feedback" id="export-msg" role="status">
+   </p>
+  </dialog>
+  <dialog aria-labelledby="confirm-title" class="confirm-modal" id="confirm-modal">
+   <h2 id="confirm-title">
+    Potwierdź zmianę
+   </h2>
+   <p id="confirm-text">
+   </p>
+   <div class="dialog-actions">
+    <button autofocus="" class="btn-secondary" id="confirm-cancel">
+     Anuluj
+    </button>
+    <button class="btn-primary" id="confirm-ok">
+     Potwierdź
+    </button>
+   </div>
+  </dialog>
+  <dialog aria-labelledby="ai-review-title" class="export-modal" id="ai-review-modal">
+   <div class="dialog-heading">
+    <h2 id="ai-review-title">
+     Sprawdź propozycję AI
+    </h2>
+    <button aria-label="Zamknij propozycję AI" class="icon-button" data-close="ai-review-modal">
+     ×
+    </button>
+   </div>
+   <pre class="ai-preview" id="ai-review-text"></pre>
+   <p>
+    Porównaj z własną notatką. Zastosowanie zastąpi odpowiednie pola bieżącego szkicu.
+   </p>
+   <div class="dialog-actions">
+    <button class="btn-secondary" data-close="ai-review-modal">
+     Odrzuć
+    </button>
+    <button class="btn-primary" id="ai-review-apply">
+     Zastosuj do karty
+    </button>
+   </div>
+  </dialog>
+  <script src="../exercises.js">
+  </script>
+  <script src="panel.js">
+  </script>
+  <script src="docs.js">
+  </script>
+ </body>
 </html>

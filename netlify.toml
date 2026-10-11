@@ -1,3 +1,7 @@
+[build]
+  command = "node scripts/build-site.mjs"
+  publish = "dist"
+
 [[edge_functions]]
   function = "basic-auth"
   path = "/*"
