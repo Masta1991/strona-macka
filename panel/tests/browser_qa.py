@@ -109,6 +109,9 @@ with sync_playwright() as pw:
     expect(page.locator('#plan-goal')).to_have_value('Powrót do wybranej aktywności')
     check('Transfer visit to plan carries identity, email, goal and notes')
     tab('baza')
+    page.locator('#demo-browse').click()
+    expect(page.locator('.ex-card')).to_have_count(4)
+    page.locator('#ex-collection').select_option('existing')
     value('#ex-search','rotacja')
     expect(page.locator('.ex-card')).to_have_count(1)
     page.locator('[data-add-ex]').click()
@@ -130,6 +133,8 @@ with sync_playwright() as pw:
     expect(page.locator('.plan-row:nth-child(2) [data-key=dose]')).to_have_value('Dawkowanie QA 2 × 8, przerwa 30 s')
     page.locator('.plan-row:first-child [data-video]').click()
     expect(page.locator('#video-modal')).to_be_visible()
+    check('Video waits for explicit load', page.locator('#video-frame').get_attribute('src') is None)
+    page.locator('#video-load').click()
     page.frame_locator('#video-frame').get_by_text('Offline video fixture').wait_for()
     dialog_audit('video')
     focus_sequence=[]

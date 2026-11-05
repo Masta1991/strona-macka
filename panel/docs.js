@@ -2,29 +2,34 @@
 (() => {
     'use strict';
     const P=window.Panel, {$,esc,read,readText,write,toast,go,confirmChange,dateLocal}=P;
-    const keys=['date','patient','subj','obj','assess','icf','plan','sign','email'];
+    const keys=['date','patient','subj','obj','assess','icf','plan','sign','email','fullname','birth','sex','identity','address','representative','practice','pwz','goal','safety','course','referrals','consent','amendment'];
     const guideKeys=['area','pain','factors','history','goal'];
     const defaultSign='Maciej Liedel, mgr fizjoterapii';
-    let docGoal='', revision=0, recognition=null, requestGeneration=0;
+    let docGoal='', visitId='', loadedId='', rootId='', revision=0, recognition=null, requestGeneration=0;
     const proc=()=>[...document.querySelectorAll('#doc-proc input:checked')].map(input=>input.value);
-    const collect=()=>Object.fromEntries([...keys.map(key=>[key,$('doc-'+key).value.trim()]),['proc',proc()],['goal',docGoal]]);
+    const collect=()=>Object.fromEntries([...keys.map(key=>[key,$('doc-'+key).value.trim()]),['proc',proc()],['visitId',visitId],['loadedId',loadedId],['rootId',rootId]]);
     const guide=()=>Object.fromEntries(guideKeys.map(key=>[key,$('intake-'+key).value]));
     const saveDraft=()=>{
         const ok=write('maciej_doc_draft',{...collect(),guide:guide(),transcript:$('doc-transcript').value});
         P.setText('doc-draft-status',ok?'Szkic zapisany lokalnie':'Nie zapisano szkicu');
-        return ok;
+        renderCompleteness();return ok;
+    };
+    const renderCompleteness=()=>{
+        const d=collect();
+        const groups=[['Pacjent i data',d.patient&&d.date],['Dane formalne pacjenta',d.fullname&&d.birth&&d.sex&&d.identity&&d.address],['Praktyka, autor i PWZFz',d.practice&&d.sign&&d.pwz],['Wywiad i badanie',d.subj&&d.obj],['Rozpoznanie i funkcjonowanie',d.assess&&d.icf],['Cel i bezpieczeństwo',d.goal&&d.safety],['Przebieg i reakcja na terapię',d.course],['Zalecenia i zgoda',d.plan&&d.consent]];
+        $('doc-completeness').innerHTML=groups.map(([name,filled])=>`<li><span aria-hidden="true">${filled?'✓':'○'}</span> ${esc(name)} <small>${filled?'uzupełniono':'do sprawdzenia'}</small></li>`).join('');
     };
     const dirty=()=>keys.filter(k=>!['date','sign'].includes(k)).some(k=>$('doc-'+k).value.trim()) || proc().length || guideKeys.some(k=>$('intake-'+k).value.trim()) || $('doc-transcript').value.trim();
     const msg=text=>{$('doc-msg').textContent=text;};
     const stopRecording=()=>{if(recognition){recognition.onend=null;recognition.onresult=null;recognition.stop();recognition=null;}$('doc-dict-big').textContent='Rozpocznij dyktowanie';$('doc-dict-big').setAttribute('aria-pressed','false');};
     const fill=data=>{
-        stopRecording();requestGeneration++;revision++;
+        stopRecording();requestGeneration++;revision++;visitId=data.visitId||'';loadedId=data.id||data.loadedId||'';rootId=data.rootId||loadedId;
         keys.forEach(key=>$('doc-'+key).value=typeof data[key]==='string'?data[key]:(key==='date'?dateLocal():key==='sign'?defaultSign:''));
         const procedures=Array.isArray(data.proc)?data.proc:[];
         document.querySelectorAll('#doc-proc input').forEach(input=>input.checked=procedures.includes(input.value));
         guideKeys.forEach(key=>$('intake-'+key).value=typeof data.guide?.[key]==='string'?data.guide[key]:'');
         $('doc-transcript').value=typeof data.transcript==='string'?data.transcript:'';docGoal=typeof data.goal==='string'?data.goal:'';
-        $('doc-ai-consent').checked=false;$('speech-consent').checked=false;$('doc-dict-status').textContent='';$('doc-visit').value='';msg('');
+        $('doc-ai-consent').checked=false;$('speech-consent').checked=false;$('doc-dict-status').textContent='';$('doc-visit').value='';msg('');renderCompleteness();
     };
     fill(read('maciej_doc_draft',{}));
     [...keys.map(k=>'doc-'+k),...guideKeys.map(k=>'intake-'+k),'doc-transcript'].forEach(id=>$(id).addEventListener('input',()=>{revision++;saveDraft();}));
@@ -34,45 +39,49 @@
         const labels={area:'Obszar i czas trwania',pain:'Ból według pacjenta (0–10)',factors:'Co nasila / pomaga',history:'Historia i istotne informacje',goal:'Cel pacjenta'};
         const g=guide();const text=guideKeys.filter(key=>g[key].trim()).map(key=>`${labels[key]}: ${g[key].trim()}`).join('\n');
         if(!text){toast('Uzupełnij przynajmniej jedno pole pomocnika.');return;}
-        $('doc-subj').value=[$('doc-subj').value.trim(),text].filter(Boolean).join('\n\n');docGoal=g.goal.trim()||docGoal;
+        $('doc-subj').value=[$('doc-subj').value.trim(),text].filter(Boolean).join('\n\n');docGoal=g.goal.trim()||docGoal;if(docGoal)$('doc-goal').value=docGoal;
         guideKeys.forEach(key=>$('intake-'+key).value='');revision++;saveDraft();$('doc-subj').focus();toast('Dodano odpowiedzi do wywiadu.');
     };
     const pendingGuide=()=>{if(guideKeys.some(key=>$('intake-'+key).value.trim())){document.querySelector('.interview-guide').open=true;$('intake-apply').focus();toast('Dodaj odpowiedzi z pomocnika do wywiadu przed zapisaniem lub eksportem.');return true;}return false;};
     const valid=()=>{
         if(pendingGuide())return false;
         const d=collect();
+        if(!ClinicCore.dateOK(d.date)){msg('Sprawdź datę wizyty.');$('doc-date').focus();return false;}
+        const linked=P.getVisits().find(v=>v.id===visitId);if(linked&&(linked.client!==d.patient||linked.date!==d.date)){visitId='';msg('Zmieniono pacjenta lub datę — karta nie jest już powiązana z terminem.');}
         for(const [key,label] of [['patient','Wpisz pacjenta lub jego kod.'],['date','Uzupełnij datę wizyty.']])if(!d[key]){msg(label);toast(label);$('doc-'+key).focus();return false;}
         if(!['subj','obj','assess','plan'].some(key=>d[key])){msg('Uzupełnij wywiad, badanie lub zalecenia.');toast('Karta nie zawiera jeszcze notatki z wizyty.');$('doc-subj').focus();return false;}return true;
     };
     const newPatient=async visit=>{
         if((dirty()||P.planHasContent())&&!await confirmChange('Rozpocząć wizytę dla nowego pacjenta? Szkic karty i bieżący plan zostaną wyczyszczone. Zapisane karty i wersje planów pozostaną w historii.','Rozpocznij nową wizytę'))return false;
-        fill(visit?{patient:visit.client,date:visit.date}:{});P.resetPlan();saveDraft();go('dokumentacja');$('doc-patient').focus();return true;
+        fill(visit?{patient:visit.client,date:visit.date,visitId:visit.id}:{});P.resetPlan();saveDraft();go('dokumentacja');$('doc-patient').focus();return true;
     };
     document.querySelectorAll('[data-new-patient]').forEach(button=>button.onclick=()=>newPatient());
-    document.addEventListener('panel:open-visit',event=>newPatient(event.detail));
-    const fillVisitOptions=()=>{const sel=$('doc-visit');sel.replaceChildren(new Option('Nowa wizyta / spoza listy',''));P.getVisits().forEach((v,i)=>sel.append(new Option(`${v.date} ${v.time} — ${v.client}`,String(i))));};
+    document.addEventListener('panel:open-visit',async event=>{const visit=event.detail;const saved=[...docs].reverse().find(d=>d.visitId===visit.id&&d.patient===visit.client&&d.date===visit.date);if(!saved){await newPatient(visit);return;}if((dirty()||P.planHasContent())&&!await confirmChange('Otworzyć zapisaną kartę tej wizyty? Bieżący szkic karty i plan zostaną wyczyszczone; historia pozostanie.','Otwórz kartę'))return;fill(saved);P.resetPlan();saveDraft();go('dokumentacja');$('doc-patient').focus();});
+    const fillVisitOptions=()=>{const sel=$('doc-visit');sel.replaceChildren(new Option('Nowa wizyta / spoza listy',''));P.getVisits().filter(v=>ClinicCore.active(v)).forEach((v,i)=>sel.append(new Option(`${v.date} ${v.time} — ${v.client}`,String(v.id))));};
     fillVisitOptions();document.addEventListener('panel:visits',fillVisitOptions);
-    $('doc-visit').onchange=async()=>{const value=$('doc-visit').value;if(value==='')return;await newPatient(P.getVisits()[Number(value)]);$('doc-visit').value='';};
+    $('doc-visit').onchange=async()=>{const value=$('doc-visit').value;if(value==='')return;await newPatient(P.getVisits().find(v=>v.id===value));$('doc-visit').value='';};
     let docs=read('maciej_docs',[]).filter(d=>d && typeof d.patient==='string' && typeof d.date==='string').map(d=>({...d,proc:Array.isArray(d.proc)?d.proc:[]}));
     const renderDocs=()=>{
         const q=P.normalize($('doc-search').value);const matches=docs.map((d,index)=>({...d,index})).reverse().filter(d=>P.normalize(`${d.patient} ${d.date} ${d.assess||''}`).includes(q));
-        $('doc-list').innerHTML=matches.length?matches.map(d=>`<div class="record-row"><div><strong>${esc(d.patient)} · ${esc(d.date)}</strong><small>${esc(d.assess||'Karta wizyty')}</small></div><div class="row-btns"><button class="btn-secondary" data-doc-load="${d.index}">Otwórz</button><button class="icon-button" data-doc-remove="${d.index}" aria-label="Usuń kartę ${esc(d.patient)} ${esc(d.date)}">×</button></div></div>`).join(''):`<div class="empty">${q?'Nie znaleziono karty. Zmień wyszukiwanie.':'Zapisz pierwszą kartę, aby wrócić do niej później.'}</div>`;
+        $('doc-list').innerHTML=matches.length?matches.map(d=>`<div class="record-row"><div><strong>${esc(d.patient)} · ${esc(d.date)}</strong><small>${esc(d.assess||'Karta wizyty')}${d.createdAt?' · zapis '+esc(new Date(d.createdAt).toLocaleString('pl-PL')):''}${d.amendment?' · '+esc(d.amendment):''}</small></div><div class="row-btns"><button class="btn-secondary" data-doc-load="${d.index}">Otwórz</button></div></div>`).join(''):`<div class="empty">${q?'Nie znaleziono karty. Zmień wyszukiwanie.':'Zapisz pierwszą kartę, aby wrócić do niej później.'}</div>`;
         P.counts();
     };
     $('doc-search').oninput=renderDocs;
     $('doc-save').onclick=()=>{
-        if(!valid())return;const data={...collect(),id:crypto.randomUUID()};
-        const last=docs.at(-1);if(last && keys.every(k=>(last[k]||'')===(data[k]||'')) && JSON.stringify(last.proc)===JSON.stringify(data.proc)){msg('Ta wersja karty jest już zapisana.');return;}
-        const next=[...docs,data];if(write('maciej_docs',next)){docs=next;saveDraft();renderDocs();msg('Zapisano nową wersję karty. Przenieś zatwierdzony wpis do dokumentacji gabinetu.');toast('Karta wizyty zapisana.');}
+        if(!valid())return;const data={...collect(),id:crypto.randomUUID(),createdAt:new Date().toISOString(),supersedes:loadedId||null,rootId:rootId||null};delete data.loadedId;
+        const last=docs.find(d=>d.id===loadedId)||docs.at(-1);if(last && (last.visitId||'')===(data.visitId||'') && keys.every(k=>(last[k]||'')===(data[k]||'')) && JSON.stringify(last.proc)===JSON.stringify(data.proc)){msg('Ta wersja karty jest już zapisana.');return;}
+        if(loadedId&&!data.amendment){msg('Opisz powód nowej wersji. Oryginalna karta pozostanie w historii.');$('doc-amendment').focus();return;}
+        data.rootId=data.rootId||data.id;
+        const next=[...docs,data];if(write('maciej_docs',next)){docs=next;loadedId=data.id;rootId=data.rootId;saveDraft();renderDocs();document.dispatchEvent(new Event('panel:docs'));msg('Zapisano nową wersję karty. Przenieś zatwierdzony wpis do dokumentacji gabinetu.');toast('Karta wizyty zapisana.');}
     };
     $('doc-list').onclick=async event=>{
-        const load=event.target.closest('[data-doc-load]'),remove=event.target.closest('[data-doc-remove]');
+        const load=event.target.closest('[data-doc-load]');
         if(load){const data=docs[+load.dataset.docLoad];const differentPlan=P.planHasContent()&&P.getPlanPatient()!==data.patient;const prompt=differentPlan?'Wczytać kartę tego pacjenta? Bieżący szkic karty i plan innego pacjenta zostaną wyczyszczone. Zapisane wersje pozostaną w historii.':'Wczytać kartę? Bieżący szkic zostanie zastąpiony. Zapisana karta pozostanie bez zmian.';if((dirty()||differentPlan)&&!await confirmChange(prompt,'Wczytaj kartę'))return;if(differentPlan)P.resetPlan();fill(data);saveDraft();$('doc-patient').focus();msg('Wczytano kartę. Zmiany zapiszesz jako nową wersję.');}
-        if(remove){if(!await confirmChange('Usunąć tę zapisaną wersję karty z lokalnej historii? Tej operacji nie można cofnąć.','Usuń wersję'))return;const next=docs.filter((d,i)=>i!==+remove.dataset.docRemove);if(write('maciej_docs',next)){docs=next;renderDocs();$('doc-search').focus();}}
     };
-    const textFor=d=>`KARTA WIZYTY — Maciej Liedel\nWpis roboczy\nData: ${d.date}\nPacjent: ${d.patient}\n\nWYWIAD\n${d.subj||'—'}\n\nBADANIE\n${d.obj||'—'}\n\nPROBLEM / ROZPOZNANIE\n${d.assess||'—'}\n\nFUNKCJONOWANIE / ICF\n${d.icf||'—'}\n\nWYKONANE PROCEDURY\n${d.proc.join(', ')||'—'}\n\nZALECENIA\n${d.plan||'—'}\n\nPodpis: ${d.sign||'—'}`;
-    $('doc-preview').onclick=()=>{if(!valid())return;const d=collect();const sections=[['Wywiad',d.subj],['Badanie',d.obj],['Problem / rozpoznanie',d.assess],['Funkcjonowanie / ICF',d.icf],['Wykonane procedury',d.proc.join(', ')],['Zalecenia',d.plan],['Podpis',d.sign]];P.exportDocument({title:'Karta wizyty',filename:'karta-wizyty-'+d.date,email:d.email,text:textFor(d),html:`<div class="paper-brand">MACIEJ LIEDEL · FIZJOTERAPIA</div><h2>Karta wizyty</h2><div class="paper-meta"><p>Wpis roboczy<br><strong>Pacjent:</strong> ${esc(d.patient)}<br><strong>Data:</strong> ${esc(d.date)}</p></div>${sections.map(([label,value])=>`<h3>${label}</h3><p>${esc(value||'—')}</p>`).join('')}`});};
-    $('doc-to-plan').onclick=()=>{if(!valid())return;const d=collect();P.fromDoc({patient:d.patient,email:d.email,goal:docGoal||d.assess,notes:d.plan});};
+    const extraSections=d=>[['Dane pacjenta',[d.fullname,d.birth,d.sex,d.identity,d.address].filter(Boolean).join(' · ')],['Przedstawiciel ustawowy',d.representative],['Praktyka / miejsce świadczenia',d.practice],['PWZFz autora',d.pwz],['Cel postępowania',d.goal],['Bezpieczeństwo / przeciwwskazania',d.safety],['Przebieg, dawkowanie i reakcja',d.course],['Wyroby medyczne / skierowania',d.referrals],['Informacja i zgoda',d.consent],['Powód uzupełnienia',d.amendment]];
+    const textFor=d=>`KARTA WIZYTY — Maciej Liedel\nWpis roboczy\nData: ${d.date}\nPacjent: ${d.patient}\n\nWYWIAD\n${d.subj||'—'}\n\nBADANIE\n${d.obj||'—'}\n\nPROBLEM / ROZPOZNANIE\n${d.assess||'—'}\n\nFUNKCJONOWANIE / ICF\n${d.icf||'—'}\n\nWYKONANE PROCEDURY\n${d.proc.join(', ')||'—'}\n\nZALECENIA\n${d.plan||'—'}\n\nAutor wpisu (tekst, nie podpis elektroniczny): ${d.sign||'—'}\n\n${extraSections(d).map(([label,value])=>label+'\n'+(value||'—')).join('\n\n')}\n\nWpis roboczy. Nie wysłano do P1.`;
+    $('doc-preview').onclick=()=>{if(!valid())return;const d=collect();const sections=[['Wywiad',d.subj],['Badanie',d.obj],['Problem / rozpoznanie',d.assess],['Funkcjonowanie / ICF',d.icf],['Wykonane procedury',d.proc.join(', ')],['Zalecenia',d.plan],['Autor wpisu (tekst, nie podpis elektroniczny)',d.sign],...extraSections(d)];P.exportDocument({title:'Karta wizyty',filename:'karta-wizyty-'+d.date,email:d.email,text:textFor(d),html:`<div class="paper-brand">MACIEJ LIEDEL · FIZJOTERAPIA</div><h2>Karta wizyty</h2><div class="paper-meta"><p>Wpis roboczy<br><strong>Pacjent:</strong> ${esc(d.patient)}<br><strong>Data:</strong> ${esc(d.date)}</p></div>${sections.map(([label,value])=>`<h3>${label}</h3><p>${esc(value||'—')}</p>`).join('')}`});};
+    $('doc-to-plan').onclick=()=>{if(!valid())return;const d=collect();P.fromDoc({patient:d.patient,email:d.email,goal:d.goal||d.assess,notes:d.plan,date:d.date});};
     renderDocs();
 
     // Configuration and requests are explicit; no remote SDK is loaded at startup.

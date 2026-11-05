@@ -1,17 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const escapeText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // 1. Theme Management
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
-    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    let storedTheme;try{storedTheme=localStorage.getItem('theme');}catch{}
+    const savedTheme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     htmlElement.setAttribute('data-theme', savedTheme);
     themeToggle.addEventListener('click', () => {
         const newTheme = htmlElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
         htmlElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        try{localStorage.setItem('theme', newTheme);}catch{}
     });
 
     // 2. GSAP Animations (graceful when CDN blocked)
     try {
+        if(reducedMotion)throw new Error('Reduced motion');
         gsap.registerPlugin(ScrollTrigger);
         gsap.to(document.querySelectorAll('.bento-item'), { duration: 1.2, y: 0, opacity: 1, stagger: 0.15, ease: "power4.out", delay: 0.3 });
         document.querySelectorAll('.reveal').forEach(el => {
@@ -50,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // 5. Wizard — rebuilt (consent → red flags → map → details → brief)
-    const show = (id) => { ['wizard-step-0', 'wizard-step-1', 'wizard-step-2', 'wizard-step-3'].forEach(s => document.getElementById(s)?.classList.add('hidden')); document.getElementById(id)?.classList.remove('hidden'); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    const show = (id) => { ['wizard-step-0', 'wizard-step-1', 'wizard-step-2', 'wizard-step-3'].forEach(s => document.getElementById(s)?.classList.add('hidden')); document.getElementById(id)?.classList.remove('hidden'); const target=document.getElementById(id);const heading=target?.querySelector('h2,h3');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}target?.scrollIntoView({ behavior: reducedMotion?'instant':'smooth', block: 'start' }); };
     const consent = document.getElementById('rodo-consent');
     document.getElementById('start-wizard').onclick = () => {
         if (!consent.checked) { document.getElementById('consent-error').classList.remove('hidden'); return; }
@@ -64,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const checked = [...document.querySelectorAll('#redflags input:checked')].map(c => c.value);
         if (checked.length) {
             redAlert.classList.remove('hidden');
-            redAlert.innerHTML = `<strong>⚠ Pilne — nie ćwicz na własną rękę:</strong> ${checked.join('; ')}. Umów się pilnie (SOR / lekarz / gabinet: <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank">Booksy</a>), a wywiad dokończ tylko jako notatkę dla terapeuty.`;
+            redAlert.innerHTML = `<strong>Objawy wymagają oceny medycznej.</strong> ${checked.map(escapeText).join('; ')}. Przy nagłym zagrożeniu zdrowia lub życia, np. silnym bólu w klatce piersiowej, nasilonej duszności lub utracie przytomności, zadzwoń pod <a href="tel:112">112</a> albo <a href="tel:999">999</a>. Nie czekaj wtedy na wizytę fizjoterapeutyczną ani zakończenie formularza. Pozostałe zaznaczone objawy skonsultuj pilnie z lekarzem. <a href="https://pacjent.gov.pl/kiedy-wezwac-karetke" target="_blank" rel="noopener noreferrer">Informacje NFZ</a>.`;
         } else redAlert.classList.add('hidden');
     });
     document.getElementById('to-step-2a').onclick = () => show('wizard-step-2');
@@ -73,8 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // view toggles
     const tF = document.getElementById('toggle-front'), tB = document.getElementById('toggle-back');
     const bF = document.getElementById('body-front'), bB = document.getElementById('body-back');
-    tF.onclick = () => { tF.classList.add('active'); tB.classList.remove('active'); bF.classList.remove('hidden'); bB.classList.add('hidden'); };
-    tB.onclick = () => { tB.classList.add('active'); tF.classList.remove('active'); bB.classList.remove('hidden'); bF.classList.add('hidden'); };
+    tF.setAttribute('aria-pressed','true');tB.setAttribute('aria-pressed','false');
+    tF.onclick = () => {tF.setAttribute('aria-pressed','true');tB.setAttribute('aria-pressed','false'); tF.classList.add('active'); tB.classList.remove('active'); bF.classList.remove('hidden'); bB.classList.add('hidden'); };
+    tB.onclick = () => {tB.setAttribute('aria-pressed','true');tF.setAttribute('aria-pressed','false'); tB.classList.add('active'); tF.classList.remove('active'); bB.classList.remove('hidden'); bF.classList.add('hidden'); };
 
     // map selection
     const parts = document.querySelectorAll('.body-part');
@@ -82,8 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const toStep2 = document.getElementById('to-step-2');
     const aiInput = document.getElementById('ai-input');
     let selectedArea = '';
+    parts.forEach(p => {p.setAttribute('role','button');p.setAttribute('tabindex','0');p.setAttribute('aria-label',p.dataset.name);p.setAttribute('aria-pressed','false');p.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();p.dispatchEvent(new MouseEvent('click',{bubbles:true}));}};});
     parts.forEach(p => p.onclick = () => {
-        parts.forEach(x => x.classList.remove('active')); p.classList.add('active');
+        parts.forEach(x => {x.classList.remove('active');x.setAttribute('aria-pressed','false');}); p.classList.add('active');p.setAttribute('aria-pressed','true');
         selectedArea = p.dataset.name;
         partLabel.textContent = `Wybrano: ${selectedArea}`;
         toStep2.classList.remove('hidden');
@@ -91,86 +97,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toStep2.onclick = () => show('wizard-step-3');
     document.getElementById('to-step-2-back').onclick = () => show('wizard-step-2');
-    document.getElementById('vas').oninput = (e) => document.getElementById('vas-value').textContent = e.target.value;
+    let painRated=false;
+    document.getElementById('vas').oninput = (e) => {painRated=true;document.getElementById('vas-value').textContent = e.target.value;};
 
     // file validation (local only)
     const fileInput = document.getElementById('medical-docs');
     const fileLabel = document.getElementById('file-label');
     let attachedNames = [];
     fileInput.onchange = () => {
-        attachedNames = [];
+        attachedNames = [];fileLabel.textContent='Wskaż pliki do zabrania na wizytę (tylko lista nazw)';
         for (const f of fileInput.files) {
             if (f.size > 10 * 1024 * 1024) { fileLabel.textContent = `⚠ ${f.name} przekracza 10 MB — pominięto.`; continue; }
             attachedNames.push(`${f.name} (${(f.size / 1024).toFixed(0)} KB)`);
         }
-        if (attachedNames.length) fileLabel.textContent = `📎 Załączono lokalnie ${attachedNames.length} plik(ów): ${attachedNames.join(', ')}`;
+        if (attachedNames.length) fileLabel.textContent = `📎 Wskazano (bez wysyłki) ${attachedNames.length} plik(ów): ${attachedNames.join(', ')}`;
     };
 
-    const KB = [
-        { k: ['kolan'], class: "Przeciążenie / podrażnienie struktur stawu kolanowego (m.in. łąkotka, więzadła, rzepka).", ex: "Quad set 10×10 s, TKE z gumą 3×12, mostek 3×12; chodzenie tyłem 10 min (filmy w panelu fizjoterapeuty).", tests: "USG kolana; po urazie skrętnym RTG; przy blokowaniu / niestabilności — rezonans.", warn: "Unikaj głębokich przysiadów, klękania i pivotów do wizyty." },
-        { k: ['lędźwia', 'krzyż', 'kręgosłup', 'grzbiet', 'th-l', 'potylica', 'szyj'], class: "Zespół bólowy kręgosłupa o charakterze przeciążeniowym lub dyskopatycznym.", ex: "Press-up McKenzie co 2–3 h (jeśli centralizuje ból), kot–wielbłąd 2×10, dead bug 3×8.", tests: "Rezonans (MRI) przy promieniowaniu poniżej kolana, drętwieniu lub braku poprawy po 2–4 tyg.", warn: "Unikaj skłonów z prostymi nogami, dźwigania i długiego siedzenia bez podparcia." },
-        { k: ['bark', 'rami'], class: "Konflikt podbarkowy / przeciążenie stożka rotatorów.", ex: "Wahadełka Codmana 2×dziennie, scaption 3×10, rotacja zewnętrzna z gumą 3×12.", tests: "USG barku (ścięgna, kaletka).", warn: "Nie śpij na bolesnym boku; nie wyciskaj nad głowę przez ból." },
-        { k: ['łokieć', 'przedramię', 'nadgarstek'], class: "Przeciążenie przyczepów (m.in. łokieć tenisisty/golfisty) lub pochewek ścięgnistych.", ex: "Ekscentryka prostowników z lekkim hantlem, rozciąganie zginaczy, przerwy w pracy myszką.", tests: "USG okolicy; przy drętwieniu palców — diagnostyka nerwu.", warn: "Unikaj powtarzalnych chwytów siłowych i pełnych pompek do wizyty." },
-        { k: ['biodr', 'krzyżowo-biodrowy', 'miednica'], class: "Przeciążenie biodra / stawu krzyżowo-biodrowego lub konflikt panewkowo-udowy.", ex: "Mostek 3×12, odwodzenie z gumą, mobilność zginaczy bioder.", tests: "RTG/AP + USG; przy klikaniu z bólem — rezonans.", warn: "Unikaj głębokiego przysiadu i długiego siedzenia po turecku." },
-        { k: ['udo', 'podudzie', 'łydka'], class: "Naciągnięcie mięśniowe lub przeciążenie powięziowe.", ex: "Spokojny marsz, ekscentryka łydki od niskiego stopnia, rolowanie 1–2 min.", tests: "USG mięśnia przy krwiaku / braku poprawy po 10 dniach.", warn: "Nie rozciągaj agresywnie świeżego naciągnięcia (48–72 h)." },
-        { k: ['skokowy'], class: "Skręcenie stawu skokowego / niestabilność kostki.", ex: "Alfabet stopą 2×dziennie, wspięcia 3×12, balans na jednej nodze.", tests: "RTG przy braku obciążania (kryteria ottawskie); USG więzadeł.", warn: "Unikaj nierównego terenu i sportów zwrotnych do wizyty." },
-        { k: ['głowa', 'żuchw', 'skroniowo'], class: "Dysfunkcja układu żucia (TMD) — m.in. bruksizm, dysk, napięcia żwaczy.", ex: "Rocabado 6×6, cofanie brody, higiena snu + miękka dieta (filmy w panelu fizjoterapeuty).", tests: "Konsultacja stomatologiczna + fizjoterapia stomatologiczna; MRI stawu tylko przy blokadach.", warn: "Nie otwieraj szeroko (jabłko, kanapki), unikaj gumy i zaciskania w dzień." }
-    ];
-    const matchKB = (area) => KB.find(e => e.k.some(k => area.toLowerCase().includes(k))) || {
-        class: "Ogólne napięcie mięśniowo-powięziowe w wybranym obszarze.",
-        ex: "Delikatna ruchomość bezbolesna, ciepło 15 min, spacer; szczegóły dobierze Maciej na wizycie.",
-        tests: "Podstawowa konsultacja z badaniem palpacyjnym i testami funkcjonalnymi.",
-        warn: "Unikaj ruchów wywołujących ostry, kłujący ból." };
     const briefBtn = document.getElementById('ai-final-submit');
     briefBtn.onclick = () => {
         const area = selectedArea || 'nie wybrano (opis poniżej)';
-        const kb = matchKB(area);
         const types = [...document.querySelectorAll('#pain-types input:checked')].map(c => c.value).join(', ') || 'nie podano';
-        const vas = document.getElementById('vas').value;
+        const vas = painRated?document.getElementById('vas').value+'/10':'nie oceniono';
         const dur = document.getElementById('pain-duration').value;
         const onset = document.getElementById('pain-onset').value;
         const flags = [...document.querySelectorAll('#redflags input:checked')].map(c => c.value);
         const notes = aiInput.value.trim() || '—';
-        briefBtn.textContent = 'Asystent przygotowuje brief...'; briefBtn.disabled = true;
+        briefBtn.textContent = 'Przygotowuję notatkę…'; briefBtn.disabled = true;
         setTimeout(() => {
             document.getElementById('wizard-step-3').classList.add('hidden');
             const box = document.getElementById('ai-response');
             box.classList.remove('hidden'); box.style.display = 'block'; box.style.opacity = 1;
-            const flagHtml = flags.length ? `<div class="ai-rec-box danger"><h4>🚨 Zgłoszone objawy alarmowe:</h4><p>${flags.join('; ')} — pacjent poinformowany o pilnej konsultacji.</p></div>` : '';
+            const flagHtml = flags.length ? `<div class="ai-rec-box danger"><h4>🚨 Zgłoszone objawy alarmowe:</h4><p>${flags.map(escapeText).join('; ')}. Formularz wyświetlił komunikat o potrzebie oceny medycznej; nie potwierdza kontaktu z lekarzem.</p></div>` : '';
             box.innerHTML = `<div class="ai-result">
-                <h3>Brief dla fizjoterapeuty — gotowy do przekazania</h3>
+                <h3>Twoja notatka dla fizjoterapeuty</h3>
                 <dl class="brief-grid">
-                    <div><dt>Obszar</dt><dd>${area}</dd></div>
-                    <div><dt>Rodzaj bólu</dt><dd>${types}</dd></div>
-                    <div><dt>Nasilenie (VAS)</dt><dd>${vas}/10</dd></div>
-                    <div><dt>Czas trwania</dt><dd>${dur}</dd></div>
-                    <div><dt>Początek</dt><dd>${onset}</dd></div>
-                    <div><dt>Załączniki (lokalnie)</dt><dd>${attachedNames.length ? attachedNames.join(', ') : 'brak'}</dd></div>
+                    <div><dt>Obszar</dt><dd>${escapeText(area)}</dd></div>
+                    <div><dt>Rodzaj bólu</dt><dd>${escapeText(types)}</dd></div>
+                    <div><dt>Nasilenie (VAS)</dt><dd>${escapeText(vas)}</dd></div>
+                    <div><dt>Czas trwania</dt><dd>${escapeText(dur)}</dd></div>
+                    <div><dt>Początek</dt><dd>${escapeText(onset)}</dd></div>
+                    <div><dt>Wskazane pliki (nieprzesłane)</dt><dd>${attachedNames.length ? attachedNames.map(escapeText).join(', ') : 'brak'}</dd></div>
                 </dl>
-                <p class="ai-notes"><strong>Opis pacjenta:</strong> ${notes.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</p>
+                <p class="ai-notes"><strong>Opis pacjenta:</strong> ${escapeText(notes).replace(/\n/g, '<br>')}</p>
                 ${flagHtml}
-                <div class="ai-rec-box"><h4>🧠 Wstępna klasyfikacja:</h4><p>${kb.class}</p></div>
-                <div class="ai-rec-box"><h4>📍 Sugerowana diagnostyka:</h4><p>${kb.tests}</p></div>
-                <div class="ai-rec-box"><h4>🧘 Bezpieczne pierwsze kroki:</h4><p>${kb.ex}</p></div>
-                <div class="ai-rec-box danger"><h4>⚠️ Czego unikać do wizyty:</h4><p>${kb.warn}</p></div>
-                <p class="ai-disclaimer">To materiał poglądowy, nie diagnoza. Ostateczną ocenę stawia fizjoterapeuta / lekarz po badaniu.</p>
+                <p class="ai-disclaimer">Notatka zawiera Twoje odpowiedzi. Formularz nie ustala rozpoznania, nie zleca badań ani nie dobiera ćwiczeń. Wskazane pliki nie zostały przesłane ani dołączone do wydruku.</p>
                 <div class="brief-actions">
                     <button id="brief-copy" class="btn-secondary">Kopiuj brief</button>
                     <button id="brief-print" class="btn-secondary">Drukuj / PDF</button>
                     <button id="brief-restart" class="btn-link">Wypełnij ponownie</button>
                     <a href="https://booksy.com/pl-pl/320195_fizjoterapia-maciej-liedel_fizjoterapia_3_warszawa?do=invite#ba_s=dl_1" target="_blank" class="btn-primary">Umów wizytę u Macieja</a>
                 </div></div>`;
-            const txt = `BRIEF DLA FIZJOTERAPEUTY (Maciej Liedel)\nObszar: ${area}\nRodzaj bólu: ${types}\nVAS: ${vas}/10\nCzas: ${dur}\nPoczątek: ${onset}\nZałączniki: ${attachedNames.join(', ') || 'brak'}\nOpis: ${aiInput.value}\nKlasyfikacja wstępna: ${kb.class}\nDiagnostyka: ${kb.tests}\nPierwsze kroki: ${kb.ex}\nUnikać: ${kb.warn}${flags.length ? `\nALARMOWE: ${flags.join('; ')}` : ''}`;
-            document.getElementById('brief-copy').onclick = async (e) => { try { await navigator.clipboard.writeText(txt); e.target.textContent = 'Skopiowano ✓'; } catch (_) {} };
-            document.getElementById('brief-print').onclick = () => openPrint('Brief dla fizjoterapeuty', `<pre>${txt.replace(/</g, '&lt;')}</pre>`);
+            const resultHeading=box.querySelector('h3');resultHeading.tabIndex=-1;resultHeading.focus();
+            const txt = `NOTATKA DLA FIZJOTERAPEUTY (Maciej Liedel)\nObszar: ${area}\nRodzaj bólu: ${types}\nNasilenie: ${vas}\nCzas: ${dur}\nPoczątek: ${onset}\nWskazane pliki (nieprzesłane): ${attachedNames.join(', ') || 'brak'}\nOpis: ${notes}${flags.length ? `\nZGŁOSZONE OBJAWY ALARMOWE: ${flags.join('; ')}` : ''}\nNotatka zawiera odpowiedzi pacjenta. Nie jest diagnozą ani planem leczenia.`;
+            document.getElementById('brief-copy').onclick = async (e) => { try { await navigator.clipboard.writeText(txt); e.target.textContent = 'Skopiowano ✓'; } catch (_) { e.target.textContent='Schowek niedostępny — użyj Drukuj / PDF'; } };
+            document.getElementById('brief-print').onclick = () => openPrint('Brief dla fizjoterapeuty', `<pre>${escapeText(txt)}</pre>`);
             document.getElementById('brief-restart').onclick = () => {
                 box.classList.add('hidden'); box.replaceChildren();
-                parts.forEach(x => x.classList.remove('active'));
+                parts.forEach(x => {x.classList.remove('active');x.setAttribute('aria-pressed','false');});
+                document.querySelectorAll('#redflags input,#pain-types input').forEach(x=>x.checked=false);redAlert.classList.add('hidden');aiInput.value='';fileInput.value='';attachedNames=[];fileLabel.textContent='Wskaż pliki do zabrania na wizytę (tylko lista nazw)';document.getElementById('vas').value='5';document.getElementById('vas-value').textContent='—';painRated=false;document.getElementById('pain-duration').selectedIndex=0;document.getElementById('pain-onset').selectedIndex=0;consent.checked=false;
                 selectedArea = ''; partLabel.textContent = 'Wybierz obszar na modelu...';
                 toStep2.classList.add('hidden'); show('wizard-step-0');
             };
-            briefBtn.textContent = 'Generuj brief (krok 4)'; briefBtn.disabled = false;
-        }, 900);
+            briefBtn.textContent = 'Przygotuj notatkę (krok 4)'; briefBtn.disabled = false;
+        }, 0);
     };
 
     // 6. Smooth scrolling (offset = realna wysokość paska + zapas)
@@ -179,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (t) {
             e.preventDefault();
             const navH = document.querySelector('.navbar')?.offsetHeight || 80;
-            window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - navH - 12, behavior: 'smooth' });
+            window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - navH - 12, behavior: reducedMotion?'instant':'smooth' });
         }
     }));
 });

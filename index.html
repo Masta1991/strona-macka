@@ -78,9 +78,9 @@
             <a href="#ai-consult" class="bento-item bento-ai">
                 <div class="bento-img bento-img-ai"></div>
                 <div class="bento-content">
-                    <span class="ai-badge">AI Assistant</span>
-                    <h2>Konsultacja AI</h2>
-                    <p>Wstępna analiza Twojego problemu.</p>
+                    <span class="ai-badge">Przed wizytą</span>
+                    <h2>Przygotuj się do wizyty</h2>
+                    <p>Uporządkuj informacje dla fizjoterapeuty.</p>
                 </div>
             </a>
         </div>
@@ -263,8 +263,8 @@
                 <div class="ai-card">
                     <div id="wizard-step-0" class="wizard-step">
                         <div class="ai-header">
-                            <span class="ai-badge">AI Diagnostic Assistant</span>
-                            <h2>Innowacyjny Wywiad Fizjoterapeutyczny</h2>
+                            <span class="ai-badge">Wywiad przed wizytą</span>
+                            <h2>Notatka przed wizytą</h2>
                             <p>Cztery krótkie kroki: bezpieczeństwo, mapa bólu, szczegóły, gotowy brief dla Macieja. To nie jest diagnoza — to przygotowanie do wizyty.</p>
                         </div>
                         <label class="consent"><input type="checkbox" id="rodo-consent"> Wyrażam zgodę na przetwarzanie podanych tu informacji o zdrowiu wyłącznie w celu przygotowania wizyty u Macieja Liedela (opis nie opuszcza Twojej przeglądarki — wysyłasz go sam, np. mailem).</label>
@@ -383,12 +383,12 @@
                                 <label><input type="checkbox" value="drętwienie / mrowienie"> Drętwienie / mrowienie</label>
                                 <label><input type="checkbox" value="sztywność"> Sztywność</label>
                             </fieldset>
-                            <label class="vas-label">Nasilenie bólu: <strong><span id="vas-value">5</span>/10</strong>
+                            <label class="vas-label">Nasilenie bólu: <strong><span id="vas-value">—</span>/10</strong>
                                 <input type="range" id="vas" min="0" max="10" value="5">
                             </label>
                             <div class="form-grid-2">
                                 <label>Od jak dawna?
-                                    <select id="pain-duration">
+                                    <select id="pain-duration"><option>Nie podano</option>
                                         <option>Kilka dni</option>
                                         <option>2–6 tygodni</option>
                                         <option>1–3 miesiące</option>
@@ -397,7 +397,7 @@
                                     </select>
                                 </label>
                                 <label>Jak się zaczęło?
-                                    <select id="pain-onset">
+                                    <select id="pain-onset"><option>Nie podano</option>
                                         <option>Nagły uraz (upadek, skręt, kontakt)</option>
                                         <option>Przeciążenie (trening, praca)</option>
                                         <option>Po zabiegu / operacji</option>
@@ -406,13 +406,13 @@
                                     </select>
                                 </label>
                             </div>
-                            <textarea id="ai-input" placeholder="Opisz swoje dolegliwości: co nasila ból, co pomaga, jakie badania już masz..."></textarea>
+                            <textarea aria-label="Opis dolegliwości" id="ai-input" placeholder="Opisz swoje dolegliwości: co nasila ból, co pomaga, jakie badania już masz..."></textarea>
                             <div class="form-actions">
                                 <label class="file-upload">
                                     <input type="file" id="medical-docs" multiple accept=".pdf,.jpg,.jpeg,.png,.dcm">
-                                    <span id="file-label">➕ Załącz dokumentację (RTG/MR, max 10 MB / plik)</span>
+                                    <span id="file-label">Wskaż pliki do zabrania na wizytę (tylko lista nazw, max 10 MB / plik)</span>
                                 </label>
-                                <button id="ai-final-submit" class="btn-primary">Generuj brief (krok 4)</button>
+                                <button id="ai-final-submit" class="btn-primary">Przygotuj notatkę (krok 4)</button>
                             </div>
                             <p class="file-note">Pliki nie są nigdzie wysyłane — lista załączników trafia tylko do Twojego briefu, który sam przekazujesz. Duże pliki DICOM prześlij mailem przed wizytą.</p>
                         </div>

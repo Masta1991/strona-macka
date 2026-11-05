@@ -8,6 +8,7 @@ const output = join(root, 'dist');
 const pages = [
   'index.html', 'style.css', 'main.js', 'exercises.js', 'publications.js',
   'panel/index.html', 'panel/panel.css', 'panel/panel.js', 'panel/docs.js',
+  'panel/clinic-core.js', 'panel/clinic.js', 'panel/demo-library.js',
 ];
 const assets = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.avif', '.jfif', '.ico', '.woff2']);
 

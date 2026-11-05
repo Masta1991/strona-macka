@@ -71,7 +71,7 @@
      <span aria-hidden="true" class="nav-icon">
       ⚙
      </span>
-     Ustawienia AI
+     Gabinet i dane
     </button>
    </div>
    <div class="sidebar-foot">
@@ -165,6 +165,12 @@
        </small>
       </button>
      </div>
+     <section class="surface clinic-summary" aria-labelledby="month-title">
+      <div class="section-heading"><h2 id="month-title">Ten miesiąc</h2><span id="metrics-source" class="field-hint">Dane lokalne • bez synchronizacji</span></div>
+      <div class="metric-strip"><div><strong id="metric-month">0</strong><span>Wszystkie terminy</span></div><div><strong id="metric-completed">0</strong><span>Odbyte</span></div><div><strong id="metric-cancelled">0</strong><span>Odwołane</span></div><div><strong id="metric-noshow">0</strong><span>Nieobecności</span></div></div>
+      <p class="field-hint">Statystyki dotyczą wybranego miesiąca kalendarzowego, na podstawie ręcznie ustawionych lub zaimportowanych statusów.</p>
+      <div class="action-bar"><button class="btn-secondary" id="show-undocumented">Wizyty odbyte bez powiązanej karty: <span id="metric-missing">0</span></button><button class="btn-link" data-go="ai">Kopia danych i integracje →</button></div>
+     </section>
      <div class="home-grid">
       <article class="workflow-card">
        <p class="eyebrow">
@@ -268,9 +274,10 @@
        ＋ Nowy pacjent
       </button>
      </div>
+     <nav class="section-jumps" aria-label="Części wizyty"><a href="#visit-intake">1. Wywiad</a><a href="#visit-exam">2. Badanie</a><a href="#visit-plan">3. Zalecenia i zapis</a></nav>
      <div class="editor-grid">
       <div class="editor-main">
-       <article class="surface">
+       <article class="surface" id="visit-intake">
         <div class="section-heading">
          <h2>
           <span class="step-number">
@@ -299,6 +306,14 @@
           <input id="doc-date" required="" type="date"/>
          </label>
         </div>
+        <details class="formal-fields"><summary>Dane do dokumentacji — pacjent i praktyka</summary>
+         <p class="field-hint">Kod pacjenta nie wystarcza w oficjalnej dokumentacji. Dane tutaj są zapisane lokalnie, bez szyfrowania pamięci przeglądarki. Wypełnij je tylko na zabezpieczonym urządzeniu; możesz też uzupełnić je dopiero w systemie gabinetowym.</p>
+         <div class="form-grid-2"><label>Imię i nazwisko<input id="doc-fullname" autocomplete="off"></label><label>Data urodzenia<input id="doc-birth" type="date"></label><label>Płeć<select id="doc-sex"><option value="">Nie uzupełniono</option><option>Kobieta</option><option>Mężczyzna</option></select></label><label>PESEL lub rodzaj i numer dokumentu<input id="doc-identity" autocomplete="off"></label></div>
+         <label>Adres zamieszkania<input id="doc-address" autocomplete="off"></label>
+         <label>Przedstawiciel ustawowy — imię, nazwisko i adres, gdy dotyczy<textarea id="doc-representative" rows="2"></textarea></label>
+         <label>Praktyka / miejsce udzielenia świadczenia<textarea id="doc-practice" placeholder="Nazwa, adres, dane rejestrowe właściwe dla praktyki" rows="2"></textarea></label>
+         <label>Numer prawa wykonywania zawodu autora<input id="doc-pwz" autocomplete="off"></label>
+        </details>
         <label>
          Wywiad i dolegliwości
          <span class="field-hint">
@@ -340,7 +355,7 @@
          </p>
         </details>
        </article>
-       <article class="surface">
+       <article class="surface" id="visit-exam">
         <div class="section-heading">
          <h2>
           <span class="step-number">
@@ -360,12 +375,11 @@
          </label>
          <label>
           Funkcjonowanie / ICF
-          <span class="optional">
-           opcjonalnie
-          </span>
           <input id="doc-icf" placeholder="Opis lub kody ICF"/>
          </label>
         </div>
+        <label>Cel postępowania<input id="doc-goal" placeholder="Cel uzgodniony z pacjentem"></label>
+        <label>Przeciwwskazania i istotne informacje o bezpieczeństwie<textarea id="doc-safety" rows="2" placeholder="Zapisz ustalenia z wywiadu i badania; nie zakładaj braku przeciwwskazań"></textarea></label>
         <fieldset id="doc-proc">
          <legend>
           Wykonane procedury
@@ -398,7 +412,8 @@
          </div>
         </fieldset>
        </article>
-       <article class="surface">
+       <article class="surface"><label>Przebieg, dawkowanie i reakcja na terapię<textarea id="doc-course" rows="3" placeholder="Co wykonano, w jakim zakresie i z jakim efektem"></textarea></label><label>Zlecone wyroby medyczne / skierowania, gdy dotyczy<textarea id="doc-referrals" rows="2"></textarea></label><label>Informacja dla pacjenta i zgoda na świadczenie<textarea id="doc-consent" rows="2" placeholder="Odnotuj faktycznie przekazane informacje i uzyskaną zgodę; nie zastępuje wymaganych dokumentów"></textarea></label></article>
+       <article class="surface" id="visit-plan">
         <div class="section-heading">
          <h2>
           <span class="step-number">
@@ -413,7 +428,7 @@
         </label>
         <div class="form-grid-2">
          <label>
-          Podpis
+          Autor wpisu
           <input id="doc-sign" value="Maciej Liedel, mgr fizjoterapii"/>
          </label>
          <label>
@@ -424,6 +439,7 @@
           <input autocomplete="off" id="doc-email" placeholder="pacjent@przyklad.pl" type="email"/>
          </label>
         </div>
+        <label>Powód nowej wersji / uzupełnienia <span class="optional">gdy zmieniasz zapisaną kartę</span><input id="doc-amendment" placeholder="Co uzupełniono i dlaczego"></label>
         <div class="action-bar">
          <button class="btn-primary" id="doc-save">
           Zapisz kartę wizyty
@@ -454,6 +470,7 @@
       </div>
       <aside class="editor-aside">
        <div class="surface">
+        <h2>Przed zakończeniem</h2><p class="field-hint">Pomocnik kompletności opisu. Nie potwierdza zgodności prawnej ani zgłoszenia do P1.</p><ul class="completion-list" id="doc-completeness"></ul>
         <p class="eyebrow">
          W TRAKCIE WIZYTY
         </p>
@@ -526,7 +543,7 @@
         Biblioteka ruchu
        </h1>
        <p>
-        Znajdź ćwiczenie i dopasuj je do potrzeb pacjenta.
+        Znajdź ćwiczenie, oznacz ulubione i dopasuj dawkowanie do pacjenta.
        </p>
       </div>
       <button class="btn-primary" data-go="generator">
@@ -537,11 +554,17 @@
        →
       </button>
      </div>
+     <div class="demo-intro surface">
+      <div><p class="eyebrow">KOLEKCJA POKAZOWA · E3 REHAB</p><h2>Od filmu do własnego planu.</h2><p>4 przykłady wideo i 2 zestawy do przetestowania pracy w gabinecie. Wybierz ćwiczenia, zmień kolejność i sprawdź podgląd planu.</p><p class="field-hint">DEMO — materiały do prezentacji, wymagają oceny fizjoterapeuty przed użyciem z pacjentem. Filmy należą do ich autorów.</p><button class="btn-primary" id="demo-browse">Pokaż 4 ćwiczenia demo →</button></div>
+      <div id="demo-sets" class="demo-sets"></div>
+     </div>
      <div class="library-toolbar surface">
+      <label>Kolekcja<select id="ex-collection"><option value="all">Wszystkie ćwiczenia</option><option value="demo">Demo · E3 Rehab (4)</option><option value="existing">Dotychczasowa biblioteka</option></select></label>
       <label class="search-field">
        Szukaj ćwiczenia
        <input id="ex-search" placeholder="Nazwa, obszar ciała lub cel ćwiczenia…" type="search"/>
       </label>
+      <button class="btn-secondary" id="ex-favorites" aria-pressed="false">☆ Tylko ulubione</button>
       <div aria-label="Obszar ciała" class="filter-list" id="ex-filters" role="group">
        <button aria-pressed="true" class="is-on" data-f="all">
         Wszystkie
@@ -573,7 +596,7 @@
      <div class="ex-grid" id="ex-list">
      </div>
      <p class="field-hint">
-      Filmy otwierają się w odtwarzaczu YouTube dopiero po wybraniu „Obejrzyj film”.
+      Podgląd filmu pokazuje źródło. Połączenie z YouTube następuje dopiero po wybraniu „Załaduj film z YouTube”.
      </p>
     </section>
     <section class="tab-panel hidden" id="tab-generator">
@@ -593,6 +616,7 @@
        ＋ Dodaj ćwiczenia
       </button>
      </div>
+     <details class="surface template-tools"><summary>Moje zestawy ćwiczeń</summary><p class="field-hint">Zapisz bieżące ćwiczenia i dawkowanie jako zestaw do ponownego użycia. Nie kopiujemy pacjenta, celu ani wskazówek z jego planu. Nazwa i dawkowanie zestawu nie powinny zawierać danych pacjenta.</p><label>Nazwa zestawu<input id="template-name" maxlength="100" placeholder="Twoja nazwa zestawu"></label><button class="btn-secondary" id="template-save">Zapisz zestaw z bieżącego planu</button><div id="template-list" class="record-list"></div></details>
      <div class="editor-grid">
       <div class="editor-main">
        <article class="surface">
@@ -716,7 +740,7 @@
         Wizyty
        </h1>
        <p>
-        Podręczny terminarz. Rezerwacje w Booksy pozostają osobno.
+        Zaplanuj dzień, oznacz wynik wizyty i przejdź prosto do karty.
        </p>
       </div>
       <button class="btn-secondary" id="visit-export">
@@ -730,11 +754,12 @@
          Zaplanowane spotkania
         </h2>
        </div>
+       <div class="form-grid-2"><label>Szukaj wizyty<input type="search" id="visit-search" placeholder="Pacjent, data, usługa…"></label><label>Pokaż<select id="visit-filter"><option value="all">Wszystkie</option><option value="today">Dzisiaj</option><option value="scheduled">Zaplanowane</option><option value="completed">Odbyte</option><option value="cancelled">Odwołane</option><option value="noshow">Nieobecności</option><option value="missing">Odbyte bez karty</option></select></label></div>
        <div class="record-list" id="visit-list">
        </div>
        <details>
         <summary>
-         Wizyty archiwalne
+         Pozostałe i zakończone wizyty
         </summary>
         <div class="record-list" id="visit-past">
         </div>
@@ -757,6 +782,7 @@
           <input id="v-time" required="" type="time"/>
          </label>
         </div>
+        <label>Czas wizyty (minuty)<input id="v-duration" type="number" min="5" max="480" step="1" value="60" required></label>
         <label>
          Pacjent / kod
          <input autocomplete="off" id="v-client" placeholder="np. AK-12" required=""/>
@@ -815,13 +841,19 @@
         DODATKOWE NARZĘDZIA
        </p>
        <h1>
-        Ustawienia asystenta AI
+        Gabinet, dane i połączenia
        </h1>
        <p>
-        Opcjonalna pomoc w redakcji. Wywiad, karty i plany działają bez AI.
+        Kopie zapasowe, import wizyt i opcjonalna pomoc w redakcji.
        </p>
       </div>
      </div>
+     <div class="settings-grid">
+      <article class="surface"><p class="eyebrow">CIĄGŁOŚĆ PRACY</p><h2>Kopia gabinetu</h2><p>Karty, szkice, wizyty, plany i zestawy w jednym zaszyfrowanym pliku. Klucze AI i hasła nie trafiają do kopii.</p><p class="field-hint">Szyfrowanie dotyczy pobranego pliku. Dane w przeglądarce pozostają niezaszyfrowane. Zachowaj hasło osobno — nie można go odzyskać.</p><label>Hasło kopii (minimum 12 znaków)<input id="backup-password" type="password" autocomplete="new-password" minlength="12"></label><button class="btn-primary" id="backup-export">Pobierz zaszyfrowaną kopię</button><p id="backup-last" class="field-hint"></p><hr><label>Odtwórz z pliku kopii (w pustej przestrzeni)<input id="backup-file" type="file" accept=".json,application/json"></label><button class="btn-secondary" id="backup-preview">Sprawdź kopię</button><div id="backup-summary" class="quiet-note hidden"></div><button id="backup-restore" class="btn-secondary hidden">Odtwórz dane po sprawdzeniu</button><p id="backup-msg" role="status" class="feedback"></p></article>
+      <article class="surface"><p class="eyebrow">BOOKSY I TERMINARZ</p><h2>Import wizyt z pliku</h2><p>Połączenie na żywo z Booksy nie jest skonfigurowane. Możesz wczytać lokalny plik CSV zgodny ze wzorem. Eksport Booksy może wymagać dopasowania kolumn.</p><button id="csv-template" class="btn-link">Pobierz wzór CSV</button><label>Plik CSV (maks. 2 MB / 2000 wizyt)<input id="visits-file" type="file" accept=".csv,text/csv"></label><button class="btn-secondary" id="visits-preview">Sprawdź import</button><div id="import-summary" class="quiet-note hidden"></div><button class="btn-primary hidden" id="visits-import">Dodaj sprawdzone wizyty</button><p id="import-msg" role="status" class="feedback"></p><p class="field-hint">Import nie zmienia rezerwacji w Booksy. Ponowny identyczny import pomija duplikaty; zmiany istniejących rezerwacji wymagają ręcznego sprawdzenia.</p></article>
+      <article class="surface"><p class="eyebrow">DOKUMENTACJA I P1</p><h2>Domknij wpis w systemie gabinetowym</h2><p>Panel przygotowuje roboczą kartę. Nie podpisuje dokumentacji elektronicznie i nie raportuje zdarzeń do P1. PDF ani e-mail nie stanowią potwierdzenia raportowania.</p><ol><li>Sprawdź kartę i dane pacjenta.</li><li>Przenieś wpis do systemu dokumentacji praktyki.</li><li>Sprawdź w tym systemie podpis, raportowanie i potwierdzenie odbioru.</li></ol><p><a href="https://www.finezjo.pl/" target="_blank" rel="noopener noreferrer">Sprawdź Finezjo — aplikację KIF ↗</a></p><p class="field-hint">Automatyczna wysyłka wymaga wyboru systemu, uprawnień praktyki, umów i testów integracyjnych. Nie wgrywaj tutaj certyfikatów P1.</p></article>
+     </div>
+     <h2 class="settings-heading">Opcjonalny asystent AI</h2>
      <div class="editor-grid">
       <article class="surface">
        <label>
@@ -918,13 +950,15 @@
      ×
     </button>
    </div>
-   <div class="video-wrap">
-    <iframe allow="fullscreen; picture-in-picture" allowfullscreen="" id="video-frame" title="Instruktaż ćwiczenia">
+   <p class="field-hint" id="video-source"></p>
+   <div class="video-consent" id="video-consent"><p>Film zewnętrzny. Załadowanie odtwarzacza łączy z YouTube i udostępnia serwisowi adres IP oraz dane techniczne przeglądarki.</p><button class="btn-primary" id="video-load">Załaduj film z YouTube</button></div>
+   <div class="video-wrap hidden" id="video-wrap">
+    <iframe allow="fullscreen; picture-in-picture" allowfullscreen="" id="video-frame" referrerpolicy="strict-origin" title="Instruktaż ćwiczenia">
     </iframe>
    </div>
    <p>
     <a id="video-link" rel="noopener noreferrer" target="_blank">
-     Otwórz w YouTube ↗
+     Film nie działa? Otwórz w YouTube ↗
     </a>
    </p>
   </dialog>
@@ -1000,8 +1034,11 @@
   </dialog>
   <script src="../exercises.js">
   </script>
+  <script src="clinic-core.js"></script>
+  <script src="demo-library.js"></script>
   <script src="panel.js">
   </script>
+  <script src="clinic.js"></script>
   <script src="docs.js">
   </script>
  </body>
